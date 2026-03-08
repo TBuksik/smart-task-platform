@@ -1,63 +1,63 @@
-# docker-compose.yml
+version: "3.8"
 
-# "services" to słowo kluczowe — tu definiujemy wszystkie kontenery.
-# Każdy klucz pod "services" to nazwa jednego kontenera.
 services:
 
-  # ===== POSTGRESQL =====
-  db:                                    # nazwa serwisu (możesz użyć jej jako hostname!)
-    image: postgres:15                   # użyj gotowego obrazu PostgreSQL w wersji 15
-                                         # Docker pobierze go automatycznie z Docker Hub
-    container_name: taskplatform_db      # przyjazna nazwa kontenera w Docker Desktop
-    
-    environment:                         # zmienne środowiskowe WEWNĄTRZ kontenera
-      POSTGRES_USER: taskuser            # nazwa użytkownika bazy danych
-      POSTGRES_PASSWORD: taskpassword    # hasło (w produkcji bierzemy to z .env!)
-      POSTGRES_DB: taskdb                # nazwa bazy danych którą PostgreSQL stworzy
-    
+  db:
+    image: postgres:15
+    container_name: taskplatform_db
+    environment:
+      POSTGRES_USER: taskuser
+      POSTGRES_PASSWORD: taskpassword
+      POSTGRES_DB: taskdb
     ports:
-      - "5432:5432"                      # "port_na_twoim_PC:port_w_kontenerze"
-                                         # możesz się połączyć z bazą przez localhost:5432
-    
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # volumes = trwałe przechowywanie danych
-      # bez tego: restartujesz kontener = tracisz całą bazę danych!
-      # "postgres_data" to nazwany volumen (zdefiniowany na dole pliku)
-      # "/var/lib/postgresql/data" = gdzie PostgreSQL trzyma pliki wewnątrz kontenera
-    
-    healthcheck:                         # Docker sprawdza czy serwis NAPRAWDĘ działa
-      test: ["CMD-SHELL", "pg_isready -U taskuser -d taskdb"]
-                                         # pg_isready = wbudowane narzędzie PostgreSQL
-                                         # zwraca 0 (sukces) gdy baza jest gotowa
-      interval: 5s                       # sprawdzaj co 5 sekund
-      timeout: 5s                        # jeśli nie odpowie w 5s = błąd
-      retries: 5                         # po 5 nieudanych próbach = kontener "unhealthy"
-
-  # ===== REDIS =====
-  redis:
-    image: redis:7-alpine                # "alpine" = ultra-lekka wersja Linuxa (5MB vs 200MB!)
-                                         # Redis nie potrzebuje pełnego OS
-    container_name: taskplatform_redis
-    
-    ports:
-      - "6379:6379"                      # standardowy port Redis
-    
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"] # redis-cli ping = Redis odpowiada "PONG" gdy działa
+      test: ["CMD-SHELL", "pg_isready -U taskuser -d taskdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: taskplatform_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
 
-  # ===== APLIKACJA PYTHON =====
-  # (na razie zakomentowana — napiszemy Dockerfile w następnej lekcji)
-  # app:
-  #   build: .
-  #   ports:
-  #     - "8000:8000"
+  app:
+    build: .
+    # "build: ." = zbuduj image z Dockerfile w bieżącym folderze
+    container_name: taskplatform_app
+    
+    ports:
+      - "8000:8000"
+    
+    environment:
+      # Uwaga: tu używamy nazw serwisów ("db", "redis") jako hostnames!
+      # Docker Compose tworzy wewnętrzną sieć — serwisy widzą się po nazwie
+      # "localhost" NIE zadziała — dla kontenera "app", baza to "db", nie "localhost"
+      DATABASE_URL: postgresql://taskuser:taskpassword@db:5432/taskdb
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: zmien-mnie-na-losowy-string-min-32-znaki
+      DEBUG: "True"
+    
+    depends_on:
+      # "depends_on" = uruchom ten serwis dopiero gdy tamte są gotowe
+      db:
+        condition: service_healthy   # czekaj aż healthcheck przejdzie
+      redis:
+        condition: service_healthy
+    
+    # W trybie deweloperskim montujemy kod jako volumen
+    # Zmiana w pliku .py jest od razu widoczna w kontenerze — bez rebuildu!
+    volumes:
+      - .:/app
 
-# Tutaj definiujemy "nazwane volumeny" — trwałe miejsca na dane.
-# Docker zarządza nimi sam, trzyma je poza kontenerami.
-# Dzięki temu dane przeżywają restart/usunięcie kontenera.
 volumes:
-  postgres_data:                         # ten volumen używany jest przez serwis "db"
+  postgres_data:
