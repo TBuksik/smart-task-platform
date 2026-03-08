@@ -1,0 +1,78 @@
+# Dockerfile
+
+# --- WARSTWA 1: Obraz bazowy ---
+# FROM = "zacznij od tego obrazu"
+# python:3.11-slim = oficjalny obraz Pythona 3.11
+# "slim" = wersja bez zbędnych narzędzi (~50MB vs ~900MB dla pełnej wersji)
+# Zawsze przypinaj konkretną wersję — nigdy nie używaj "python:latest"
+# "latest" może się zmienić i zepsuć Twój build bez ostrzeżenia
+FROM python:3.11-slim
+
+# --- WARSTWA 2: Zmienne środowiskowe obrazu ---
+# ENV ustawia zmienne środowiskowe wewnątrz kontenera
+# PYTHONDONTWRITEBYTECODE=1 — Python nie tworzy plików .pyc (cache bytecode)
+# W kontenerze to zbędne i tylko zaśmieca filesystem
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# PYTHONUNBUFFERED=1 — Python nie buforuje wyjścia (stdout/stderr)
+# Bez tego logi aplikacji mogą nie pojawiać się w docker compose logs
+# Z tym: widzisz logi natychmiast, w czasie rzeczywistym
+ENV PYTHONUNBUFFERED=1
+
+# --- WARSTWA 3: Katalog roboczy ---
+# WORKDIR = "ustaw katalog roboczy" — wszystkie następne komendy
+# wykonają się wewnątrz /app
+# Jeśli /app nie istnieje, Docker stworzy go automatycznie
+# To odpowiednik: mkdir /app && cd /app
+WORKDIR /app
+
+# --- WARSTWA 4: Użytkownik bez uprawnień root ---
+# Domyślnie Docker uruchamia procesy jako root — to zagrożenie bezpieczeństwa
+# Jeśli ktoś przejmie Twój kontener, ma roota w środku
+# Tworzymy zwykłego użytkownika "appuser" bez specjalnych uprawnień
+# -r = system user (bez katalogu domowego, bez hasła)
+RUN adduser --disabled-password --gecos '' appuser
+
+# --- WARSTWA 5: Zależności (osobno od kodu!) ---
+# Najpierw kopiujemy TYLKO requirements.txt
+# Dlaczego nie od razu cały kod?
+# Bo zależności zmieniają się rzadko — Docker będzie używał cache'u
+# tej warstwy przy każdym buildzie gdzie requirements.txt się nie zmienił
+COPY requirements.txt .
+
+# pip install z flagami produkcyjnymi:
+# --no-cache-dir = nie zapisuj cache pip w obrazie (mniejszy rozmiar)
+# --upgrade pip = upewnij się że pip jest aktualny
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# --- WARSTWA 6: Kod aplikacji ---
+# Teraz kopiujemy cały kod
+# Ta warstwa zmienia się przy każdej zmianie kodu
+# Ale warstwy 1-5 (zależności) zostają z cache'u — build jest szybki
+COPY . .
+
+# Przekazujemy własność plików do naszego użytkownika
+# -R = rekurencyjnie (wszystkie pliki i foldery)
+RUN chown -R appuser:appuser /app
+
+# Przełączamy się na bezpiecznego użytkownika
+# Od tej linii wszystkie procesy działają jako "appuser", nie root
+USER appuser
+
+# --- WARSTWA 7: Eksponowanie portu ---
+# EXPOSE to dokumentacja — mówi "ten kontener używa portu 8000"
+# To NIE otwiera portu automatycznie (to robi "ports" w docker-compose.yml)
+# Ale jest dobrą praktyką i niektóre narzędzia to czytają
+EXPOSE 8000
+
+# --- WARSTWA 8: Komenda startowa ---
+# CMD = komenda która uruchomi się gdy kontener startuje
+# Format tablicowy ["komenda", "arg1", "arg2"] jest preferowany
+# (unika problemów z interpretacją shell'a)
+# uvicorn = serwer ASGI dla FastAPI (o tym więcej w następnym module)
+# app.main:app = "w pliku app/main.py znajdź obiekt o nazwie 'app'"
+# --host 0.0.0.0 = słuchaj na wszystkich interfejsach sieciowych
+#                  bez tego kontener byłby niedostępny z zewnątrz!
+# --port 8000 = port na którym działa serwer
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
