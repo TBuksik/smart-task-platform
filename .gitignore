@@ -1,0 +1,26 @@
+# Środowisko wirtualne — setki MB, niepotrzebne innym
+.venv/
+venv/
+
+# Zmienne środowiskowe — NIGDY nie commituj haseł!
+.env
+
+# Cache Pythona — generowany automatycznie, nie potrzebny w repo
+__pycache__/
+*.pyc
+*.pyo
+
+# Pliki systemowe
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logi
+*.log
+
+# Dane testowe i coverage
+.coverage
+htmlcov/
