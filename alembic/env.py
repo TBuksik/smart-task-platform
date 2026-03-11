@@ -1,7 +1,6 @@
-import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import create_engine
 from alembic import context
 
 from app.core.config import settings
@@ -25,24 +24,21 @@ def do_run_migrations(connection):
     with context.begin_transaction():
         context.run_migrations()
 
-async def run_async_migrations():
-    connectable = create_async_engine(
+def run_migrations_online():
+    connectable = create_engine(
         settings.DATABASE_URL.replace(
             "postgresql://",
-            "postgresql+asyncpg://"
+            "postgresql+psycopg2://"
         )
     )
 
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
-
-    await connectable.dispose()
-
-def run_migrations_online():
-    import sys
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        
-    asyncio.run(run_async_migrations())
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True
+        )
+        with context.begin_transaction():
+            context.run_migrations()
 
 run_migrations_online()
