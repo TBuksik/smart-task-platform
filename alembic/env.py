@@ -26,10 +26,7 @@ def do_run_migrations(connection):
 
 def run_migrations_online():
     connectable = create_engine(
-        settings.DATABASE_URL.replace(
-            "postgresql://",
-            "postgresql+psycopg2://"
-        )
+        "postgresql+psycopg2://taskuser:taskpassword@localhost:5432/taskdb?sslmode=disable"
     )
 
     with connectable.connect() as connection:
