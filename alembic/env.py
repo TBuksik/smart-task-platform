@@ -32,14 +32,17 @@ def do_run_migrations(connection):
 
 def run_migrations_online():
     connectable = create_engine(
-        "postgresql+psycopg2://taskuser:taskpassword@localhost:5432/taskdb?sslmode=disable"
+        settings.DATABASE_URL.replace(
+            "postgresql://",
+            "postgresql+psycopg2://"
+        )
     )
 
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            compare_type=True
+            compare_type=True,
         )
         with context.begin_transaction():
             context.run_migrations()
