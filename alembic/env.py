@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.core.database import Base
 
 from app.models import task
+from app.models import user
 
 config = context.config
 
