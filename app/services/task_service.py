@@ -40,3 +40,14 @@ async def update_task(
     await db.commit()
     await db.refresh(db_task)
     return db_task
+
+async def delete_task(db: AsyncSession, task_id: int) -> bool:
+    db_task = await get_task(db, task_id)
+
+    if db_task is None:
+        return False
+    
+    await db.delete(db_task)
+    await db.commit()
+
+    return True
