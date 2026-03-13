@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Boolean, func
 from datetime import datetime
@@ -10,6 +12,10 @@ class User(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True,
         autoincrement=True
+    )
+
+    full_name: Mapped[Optional[str]] = mapped_column(
+        String(100)
     )
 
     email: Mapped[str] = mapped_column(
