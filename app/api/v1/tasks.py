@@ -27,19 +27,13 @@ async def get_tasks(db: AsyncSession = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     summary="Pobierz zadanie po ID",
 )
-async def get_task(task_id: int):
-    task = next(
-        (t for t in fake_db if t["id"] == task_id),
-        None
-    )
+async def get_task(task_id: int, db: AsyncSession = Depends(get_db)):
+    result =  await task_service.get_task(db, task_id)
 
-    if task is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Zadanie o id {task_id} nie istnieje"
-        )
+    if result is None:
+        raise HTTPException(status_code=404, detail="Task not found.")
     
-    return task
+    return result
 
 @router.post(
     "/",
