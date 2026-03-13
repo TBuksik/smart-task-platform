@@ -12,10 +12,6 @@ router = APIRouter(
     tags=["tasks"],
 )
 
-fake_db: List[dict] = []
-
-next_id: int = 1
-
 @router.get(
     "/",
     response_model=List[TaskResponse],
