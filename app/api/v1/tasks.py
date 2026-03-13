@@ -63,7 +63,7 @@ async def update_task(task_id: int, task_data: TaskUpdate, db: AsyncSession = De
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Usuń zadanie",
 )
-async def delete_task(task_id: int, db):
+async def delete_task(task_id: int, db: AsyncSession = Depends(get_db)):
     result = await task_service.delete_task(db, task_id)
 
     if result is False:
