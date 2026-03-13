@@ -9,6 +9,7 @@ venv/
 __pycache__/
 *.pyc
 *.pyo
+test_run.py
 
 # Pliki systemowe
 .DS_Store
