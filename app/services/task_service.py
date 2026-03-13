@@ -3,7 +3,7 @@ from app.models.task import Task
 from app.schemas.task import TaskCreate
 
 from sqlalchemy import select
-from typing import Optional
+from typing import List, Optional
 
 async def create_task(db: AsyncSession, task_data: TaskCreate) -> Task:
     db_task = Task(**task_data.model_dump())
@@ -17,3 +17,7 @@ async def get_task(db: AsyncSession, task_id: int) -> Optional[Task]:
         select(Task).where(Task.id == task_id)
     )
     return result.scalars().first()
+
+async def get_tasks(db: AsyncSession) -> List[Task]:
+    result = await db.execute(select(Task))
+    return result.scalars().all()
