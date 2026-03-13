@@ -47,23 +47,9 @@ async def get_task(task_id: int):
     status_code=status.HTTP_201_CREATED,
     summary="Stwórz nowe zadanie",
 )
-async def create_task(task_data: TaskCreate):
-    global next_id
-
-    now = datetime.now(timezone.utc)
-
-    new_task = {
-        **task_data.model_dump(),
-        "id": next_id,
-        "created_at": now,
-        "updated_at": None,
-    }
-
-    fake_db.append(new_task)
-    next_id += 1
-
-    return new_task
-
+async def create_task(task_data: TaskCreate, db: AsyncSession = Depends(get_db)):
+    return await task_service.create_task(db, task_data)
+    
 @router.put(
     "/{task_id}",
     response_model=TaskResponse,
