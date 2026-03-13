@@ -27,4 +27,11 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
 
     return token
-        
+
+def decode_access_token(token: str) -> Optional[str]:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        email = payload.get("sub")
+        return email
+    except JWTError:
+        return None
