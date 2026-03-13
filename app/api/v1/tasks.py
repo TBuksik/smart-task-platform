@@ -63,3 +63,8 @@ async def update_task(task_id: int, task_data: TaskUpdate, db: AsyncSession = De
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Usuń zadanie",
 )
+async def delete_task(task_id: int, db):
+    result = await task_service.delete_task(db, task_id)
+
+    if result is False:
+        raise HTTPException(status_code=404, detail="Task not found.")
