@@ -24,3 +24,14 @@ async def create_user(db: AsyncSession, user_data: UserCreate) -> User:
     await db.refresh(new_user)
 
     return new_user
+
+async def authenticate_user(db: AsyncSession, email: str, password: str) -> Optional[User]:
+    user = await get_user_by_email(db, email)
+
+    if user is None:
+        return None
+    
+    if not verify_password(password, user.hashed_password):
+        return None
+    
+    return user
