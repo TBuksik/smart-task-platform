@@ -18,8 +18,8 @@ router = APIRouter(
     status_code=status.HTTP_200_OK,
     summary="Pobierz wszystkie zadania",
 )
-async def get_tasks():
-    return fake_db
+async def get_tasks(db: AsyncSession = Depends(get_db)):
+    return await task_service.get_tasks(db)
 
 @router.get(
     "/{task_id}",
