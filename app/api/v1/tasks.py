@@ -50,39 +50,16 @@ async def create_task(task_data: TaskCreate, db: AsyncSession = Depends(get_db))
     status_code=status.HTTP_200_OK,
     summary="Zaktualizuj zadanie",
 )
-async def update_task(task_id: int, task_data: TaskUpdate):
-    task_index = next(
-        (i for i, t in enumerate(fake_db) if t["id"] == task_id),
-        None
-    )
+async def update_task(task_id: int, task_data: TaskUpdate, db: AsyncSession = Depends(get_db)):
+    result = await task_service.update_task(db, task_id, task_data)
 
-    if task_index is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Zadanie o ID {task_id} nie istnieje"
-        )
-    
-    update_data = task_data.model_dump(exclude_unset=True)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Task not found.")
 
-    fake_db[task_index].update(update_data)
-    fake_db[task_index]["updated_at"] = datetime.now(timezone.utc)
-
-    return fake_db[task_index]
+    return result
 
 @router.delete(
     "/{task_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Usuń zadanie",
 )
-async def delete_task(task_id: int):
-    task_index = next(
-        (i for i, t in enumerate(fake_db) if t["id"] == task_id),
-    )
-
-    if task_index is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Zadanie o ID {task_id} nie istnieje"
-        )
-    
-    fake_db.pop(task_index)
