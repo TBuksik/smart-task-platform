@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.task import Task
-from app.schemas.task import TaskCreate, TaskStatus, TaskUpdate
+from app.schemas.task import TaskCreate, TaskUpdate
 
 from sqlalchemy import select
 from typing import List, Optional

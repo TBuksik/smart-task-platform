@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Depends, status
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from datetime import datetime, timezone
 
-from starlette.status import HTTP_404_NOT_FOUND
-
+from app.core.database import get_db
 from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse, TaskStatus
+from app.services import task_service
 
 router = APIRouter(
     prefix="/tasks",
