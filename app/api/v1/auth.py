@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -31,8 +32,15 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     "/login",
     status_code=status.HTTP_200_OK
 )
-async def login(user_data: UserLogin, db: AsyncSession = Depends(get_db)):
-    user = await user_service.authenticate_user(db, user_data.email, user_data.password)
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(get_db)
+):
+    user = await user_service.authenticate_user(
+        db,
+        form_data.username,
+        form_data.password
+    )
 
     if user is None:
         raise HTTPException(status_code=401, detail="Nieprawidłowy email lub hasło")

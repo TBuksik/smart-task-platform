@@ -4,8 +4,10 @@ from typing import List
 from datetime import datetime, timezone
 
 from app.core.database import get_db
+from app.core.dependencies import get_current_user
 from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse, TaskStatus
 from app.services import task_service
+from app.models.user import User
 
 router = APIRouter(
     prefix="/tasks",
@@ -18,7 +20,7 @@ router = APIRouter(
     status_code=status.HTTP_200_OK,
     summary="Pobierz wszystkie zadania",
 )
-async def get_tasks(db: AsyncSession = Depends(get_db)):
+async def get_tasks(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     return await task_service.get_tasks(db)
 
 @router.get(
