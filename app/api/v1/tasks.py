@@ -9,6 +9,8 @@ from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse, TaskStatus
 from app.services import task_service
 from app.models.user import User
 from app.workers.tasks import send_weekly_report
+from app.workers.celery_app import celery_app
+from celery.result import AsyncResult
 
 router = APIRouter(
     prefix="/tasks",
@@ -39,6 +41,19 @@ async def get_task(task_id: int, db: AsyncSession = Depends(get_db), current_use
         raise HTTPException(status_code=404, detail="Task not found.")
     
     return result
+
+@router.get(
+    "/{task_id}/status/{celery_task_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Pobierz status zadania"
+)
+async def get_task_status(task_id: int, celery_task_id: str, current_user: User = Depends(get_current_user)):
+    celery_result = AsyncResult(celery_task_id, app=celery_app)
+    return {
+        "celery_task_id": celery_task_id,
+        "status": celery_result.status,
+        "result": celery_result.result
+    }
 
 # -----------
 
