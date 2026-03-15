@@ -44,7 +44,7 @@ services:
       # "localhost" NIE zadziała — dla kontenera "app", baza to "db", nie "localhost"
       DATABASE_URL: postgresql://taskuser:taskpassword@db:5432/taskdb
       REDIS_URL: redis://redis:6379
-      SECRET_KEY: zmien-mnie-na-losowy-string-min-32-znaki
+      SECRET_KEY: 0jaInno0ZvFMzgBbpHqojej94uMaqMPX
       DEBUG: "True"
     
     depends_on:
@@ -56,6 +56,49 @@ services:
     
     # W trybie deweloperskim montujemy kod jako volumen
     # Zmiana w pliku .py jest od razu widoczna w kontenerze — bez rebuildu!
+    volumes:
+      - .:/app
+
+    # ===== CELERY WORKER =====
+  worker:
+    build: .
+    container_name: taskplatform_worker
+    # Komenda uruchamiająca workera
+    # -A app.workers.celery_app = "znajdź instancję Celery w tym module"
+    # worker = tryb workera (wykonuje zadania)
+    # --loglevel=info = pokazuj logi na poziomie INFO
+    command: celery -A app.workers.celery_app worker --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://taskuser:taskpassword@db:5432/taskdb
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: 0jaInno0ZvFMzgBbpHqojej94uMaqMPX
+      DEBUG: "True"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+  # ===== CELERY BEAT =====
+  beat:
+    build: .
+    container_name: taskplatform_beat
+    # beat = tryb schedulera (wysyła zadania cykliczne do kolejki)
+    # --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    # na razie używamy domyślnego schedulera
+    command: celery -A app.workers.celery_app beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://taskuser:taskpassword@db:5432/taskdb
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: 0jaInno0ZvFMzgBbpHqojej94uMaqMPX
+      DEBUG: "True"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - .:/app
 
