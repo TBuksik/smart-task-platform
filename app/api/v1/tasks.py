@@ -8,11 +8,14 @@ from app.core.dependencies import get_current_user
 from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse, TaskStatus
 from app.services import task_service
 from app.models.user import User
+from app.workers.tasks import send_weekly_report
 
 router = APIRouter(
     prefix="/tasks",
     tags=["tasks"],
 )
+
+# ----------
 
 @router.get(
     "/",
@@ -37,6 +40,8 @@ async def get_task(task_id: int, db: AsyncSession = Depends(get_db), current_use
     
     return result
 
+# -----------
+
 @router.post(
     "/",
     response_model=TaskResponse,
@@ -46,6 +51,31 @@ async def get_task(task_id: int, db: AsyncSession = Depends(get_db), current_use
 async def create_task(task_data: TaskCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     return await task_service.create_task(db, task_data)
     
+
+@router.post(
+    "/{task_id}/run",
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Uruchom zadanie asynchroniczne",
+)
+async def run_task(
+    task_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    db_task = await task_service.get_task(db, task_id)
+
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found.")
+
+    celery_task = send_weekly_report.delay(current_user.email)
+
+    return {
+        "message": "Zadanie zostało zlecone",
+        "celery_task_id": celery_task.id,
+        "task_id": task_id
+    }
+# ----------
+
 @router.put(
     "/{task_id}",
     response_model=TaskResponse,
@@ -59,6 +89,8 @@ async def update_task(task_id: int, task_data: TaskUpdate, db: AsyncSession = De
         raise HTTPException(status_code=404, detail="Task not found.")
 
     return result
+
+# -----------
 
 @router.delete(
     "/{task_id}",
