@@ -29,7 +29,7 @@ async def get_tasks(db: AsyncSession = Depends(get_db), current_user: User = Dep
     status_code=status.HTTP_200_OK,
     summary="Pobierz zadanie po ID",
 )
-async def get_task(task_id: int, db: AsyncSession = Depends(get_db)):
+async def get_task(task_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result =  await task_service.get_task(db, task_id)
 
     if result is None:
@@ -43,7 +43,7 @@ async def get_task(task_id: int, db: AsyncSession = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
     summary="Stwórz nowe zadanie",
 )
-async def create_task(task_data: TaskCreate, db: AsyncSession = Depends(get_db)):
+async def create_task(task_data: TaskCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     return await task_service.create_task(db, task_data)
     
 @router.put(
@@ -52,7 +52,7 @@ async def create_task(task_data: TaskCreate, db: AsyncSession = Depends(get_db))
     status_code=status.HTTP_200_OK,
     summary="Zaktualizuj zadanie",
 )
-async def update_task(task_id: int, task_data: TaskUpdate, db: AsyncSession = Depends(get_db)):
+async def update_task(task_id: int, task_data: TaskUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await task_service.update_task(db, task_id, task_data)
 
     if result is None:
@@ -65,7 +65,7 @@ async def update_task(task_id: int, task_data: TaskUpdate, db: AsyncSession = De
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Usuń zadanie",
 )
-async def delete_task(task_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_task(task_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await task_service.delete_task(db, task_id)
 
     if result is False:
