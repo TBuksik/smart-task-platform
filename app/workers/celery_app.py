@@ -11,4 +11,11 @@ celery_app.config_from_object({
     "accept_content": ["json"],
     "timezone": "Europe/Warsaw",
     "enable_utc": True,
+    "beat_schedule": {
+        "check-pending-tasks": {
+            "task": "app.workers.tasks.check_pending_tasks",
+            "schedule": 60.0,
+            "args": ()
+        }
+    }
 })
