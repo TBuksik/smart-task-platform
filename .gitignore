@@ -10,6 +10,7 @@ __pycache__/
 *.pyc
 *.pyo
 test_run.py
+google_credentials.json
 
 # Pliki systemowe
 .DS_Store
