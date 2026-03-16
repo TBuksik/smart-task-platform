@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     # --- OpenAI ---
     OPENAI_API_KEY: Optional[str] = None
 
+    # --- Email ---
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_FROM: str = "noreply@smarttaskplatform.com"
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = "sandbox.smtp.mailtrap.io"
+
     class Config:
         env_file = ".env"
         case_sensitive = False
