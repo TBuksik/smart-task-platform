@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     MAIL_PORT: int = 587
     MAIL_SERVER: str = "sandbox.smtp.mailtrap.io"
 
+    # --- Gooogle Calendar ---
+    GOOGLE_CALENDAR_ID: str = ""
+    GOOGLE_CREDENTIALS_FILE: str = "google_credentials.json"
+
     class Config:
         env_file = ".env"
         case_sensitive = False
