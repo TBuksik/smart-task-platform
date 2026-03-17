@@ -7,6 +7,7 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse, TaskStatus
 from app.services import task_service
+from app.services.ai_service import parse_schedule_rule
 from app.models.user import User
 from app.workers.tasks import send_weekly_report
 from app.workers.celery_app import celery_app
@@ -41,6 +42,28 @@ async def get_task(task_id: int, db: AsyncSession = Depends(get_db), current_use
         raise HTTPException(status_code=404, detail="Task not found.")
     
     return result
+
+@router.get(
+    "/{task_id}/parse-schedule",
+    status_code=status.HTTP_200_OK,
+    summary="Zamień harmonogram z nl na cron"
+)
+async def parse_schedule(task_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    db_task = await task_service.get_task(db, task_id)
+
+    if db_task is None:
+        raise HTTPException(404, detail="Nie znaleziono zadania")
+
+    if db_task.schedule is None:
+        raise HTTPException(400, detail="Zadanie nie ma harmonogramu")
+
+    ai_result = await parse_schedule_rule(db_task.schedule)
+    
+    return {
+        "task_id": task_id,
+        "schedule_text": db_task.schedule,
+        "parsed": ai_result
+    }
 
 @router.get(
     "/{task_id}/status/{celery_task_id}",
