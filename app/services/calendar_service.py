@@ -33,7 +33,7 @@ def get_weekly_events() -> List[dict]:
         timeMax=time_max,
         maxResults=50,
         singleEvents=True,
-        orderBy="smartTime"
+        orderBy="startTime"
     ).execute()
 
     events = events_result.get("items", [])
