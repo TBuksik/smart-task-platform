@@ -2,6 +2,7 @@ from os import name
 
 from app.workers.celery_app import celery_app
 from app.core.email import send_email
+from app.services.calendar_service import get_weekly_events
 import logging
 import asyncio
 
@@ -14,9 +15,16 @@ def check_pending_tasks():
 
 @celery_app.task(name="app.workers.tasks.send_weekly_report")
 def send_weekly_report(user_email: str):
+    events = get_weekly_events()
+
+    events_html = ""
+    for event in events:
+        events_html += f"<p>{event['title']} - {event['start']}</p>"
+
     asyncio.get_event_loop().run_until_complete(send_email(
         [user_email],
         "Raport tygodniowy",
-        f"<h1>Raport dla {user_email}</h1>"
+        events_html
     ))
+    
     return {"status": "sent", "email": user_email}
