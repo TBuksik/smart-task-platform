@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from app.core.config import settings
-from app.api.v1 import tasks
-from app.api.v1 import auth
+from app.api.v1 import tasks, auth
+
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -11,15 +12,10 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-app.include_router(
-    tasks.router,
-    prefix="/api/v1"
-)
+app.include_router(tasks.router, prefix="/api/v1")
+app.include_router(auth.router, prefix="/api/v1")
 
-app.include_router(
-    auth.router,
-    prefix="/api/v1"
-)
+Instrumentator().instrument(app).expose(app)
 
 @app.get("/")
 async def root():
@@ -30,7 +26,4 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "app": settings.APP_NAME
-    }
+    return {"status": "healthy", "app": settings.APP_NAME}
