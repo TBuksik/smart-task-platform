@@ -106,5 +106,34 @@ services:
     volumes:
       - .:/app
 
+  # ===== PROMETHEUS =====
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: taskplatform_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      # montujemy nasz plik konfiguracyjny
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    # prometheus musi startować po aplikacji
+    depends_on:
+      - app
+
+  # ===== GRAFANA =====
+  grafana:
+    image: grafana/grafana:latest
+    container_name: taskplatform_grafana
+    ports:
+      - "3000:3000"
+    environment:
+      # domyślne dane logowania do Grafany
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      # trwałe przechowywanie dashboardów i konfiguracji
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
 volumes:
   postgres_data:
+  grafana_data:    # ← nowy volumen
