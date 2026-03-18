@@ -1,0 +1,75 @@
+# Nazwa workflow — pojawi się w zakładce Actions na GitHub
+name: CI
+
+on:
+  # Uruchom przy każdym pushu na dowolną gałąź
+  push:
+    branches: ["*"]
+  # Uruchom przy każdym Pull Requeście do main
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  # "test" to nazwa joba — możesz mieć wiele jobów
+  test:
+    # Uruchom na świeżej maszynie Ubuntu
+    runs-on: ubuntu-latest
+
+    # Usługi które muszą działać podczas testów
+    # GitHub uruchomi je jako kontenery Docker
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: taskuser
+          POSTGRES_PASSWORD: taskpassword
+          POSTGRES_DB: taskdb
+        # health check — czekaj aż baza będzie gotowa
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      # Krok 1 — pobierz kod z repozytorium
+      - name: Checkout code
+        uses: actions/checkout@v4
+        # "uses" = użyj gotowej akcji z GitHub Marketplace
+        # actions/checkout = oficjalna akcja do pobierania kodu
+
+      # Krok 2 — zainstaluj Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Krok 3 — zainstaluj zależności
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Krok 4 — uruchom testy
+      - name: Run tests
+        # Zmienne środowiskowe dostępne podczas testów
+        env:
+          DATABASE_URL: postgresql://taskuser:taskpassword@localhost:5432/taskdb
+          REDIS_URL: redis://localhost:6379
+          SECRET_KEY: test-secret-key-for-ci-minimum-32-characters
+          DEBUG: "True"
+          OPENAI_API_KEY: "test-key"
+        run: |
+          pytest tests/ -v
