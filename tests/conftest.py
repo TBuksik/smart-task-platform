@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from app.main import app
 from app.core.database import Base, get_db
 
-TEST_DATABASE_URL = "postgresql+asyncpg://taskuser:taskpassword@localhost:5432/taskdb_test"
+TEST_DATABASE_URL = "postgresql+asyncpg://taskuser:taskpassword@db:5432/taskdb_test"
 
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 
