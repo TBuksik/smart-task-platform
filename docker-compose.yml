@@ -9,6 +9,7 @@ services:
       POSTGRES_USER: taskuser
       POSTGRES_PASSWORD: taskpassword
       POSTGRES_DB: taskdb
+      POSTGRES_MULTIPLE_DATABASES: taskdb,taskdb_test
     ports:
       - "5432:5432"
     volumes:
