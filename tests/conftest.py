@@ -1,10 +1,10 @@
 # tests/conftest.py
 
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-import pytest_asyncio
 
 from app.main import app
 from app.core.database import Base, get_db
@@ -30,7 +30,7 @@ async def create_test_database():
         await conn.run_sync(Base.metadata.drop_all)
 
 
-@pytest_asyncio.fixture(loop_scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def client():
     async def override_get_db():
         async with TestSessionLocal() as session:
