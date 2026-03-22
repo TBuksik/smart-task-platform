@@ -27,11 +27,12 @@ async def create_test_database():
 
 @pytest_asyncio.fixture
 async def db_session():
-    async with TestSessionLocal() as conn:
-        await conn.begin()
-        async with AsyncSession(bind=conn, expire_on_commit=False) as session:
-            yield session
-            await conn.rollback()
+    async with TestSessionLocal() as session:
+        yield session
+        await session.rollback()
+        async with test_engine.begin() as conn:
+            for table in reversed(Base.metadata.sorted_tables):
+                await conn.execute(table.delete())
 
 @pytest_asyncio.fixture
 async def client(db_session):
