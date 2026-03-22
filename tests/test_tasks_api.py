@@ -41,5 +41,10 @@ async def test_get_tasks(client: AsyncClient):
     )
 
     response_get = await client.get(
-        "/api/v1/auth"
+        "/api/v1/tasks/",
+        headers=headers
     )
+
+    assert response_get.status_code == 200
+    assert isinstance(response_get.json(), list)
+    assert len(response_get.json()) >= 1
