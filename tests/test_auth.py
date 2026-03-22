@@ -85,3 +85,22 @@ async def test_login_wrong_password(client: AsyncClient):
     )
 
     assert response_login.status_code == 401
+
+async def get_auth_token(client: AsyncClient) -> str:
+    response_register = await client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "tasktest@example.com",
+            "password": "testpassword123"
+        }
+    )
+
+    response_login = await client.post(
+        "/api/v1/auth/login",
+        data={
+            "username": "tasktest@example.com",
+            "password": "testpassword123"
+        }
+    )
+
+    return response_login.json()["access_token"]
