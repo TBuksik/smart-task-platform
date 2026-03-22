@@ -1,5 +1,3 @@
-# tests/conftest.py
-
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
@@ -11,30 +9,42 @@ from app.core.database import Base, get_db
 
 TEST_DATABASE_URL = "postgresql+asyncpg://taskuser:taskpassword@db:5432/taskdb_test"
 
-test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 
-TestSessionLocal = sessionmaker(
-    test_engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
+@pytest_asyncio.fixture(autouse=True)
+async def setup_database():
+    # Tworzymy silnik i tabele przed każdym testem
+    # scope="function" = fresh engine dla każdego testu
+    # eliminuje problem z event loop
+    engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 
-
-@pytest_asyncio.fixture(scope="session", autouse=True)
-async def create_test_database():
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    yield
-    async with test_engine.begin() as conn:
+
+    yield engine
+
+    # Czyścimy tabele po każdym teście
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
+    await engine.dispose()
 
-@pytest_asyncio.fixture(scope="session")
-async def client():
+
+@pytest_asyncio.fixture
+async def db_session(setup_database):
+    engine = setup_database
+    TestSessionLocal = sessionmaker(
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False
+    )
+    async with TestSessionLocal() as session:
+        yield session
+
+
+@pytest_asyncio.fixture
+async def client(db_session):
     async def override_get_db():
-        async with TestSessionLocal() as session:
-            yield session
+        yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
 
