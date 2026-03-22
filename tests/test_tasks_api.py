@@ -48,3 +48,15 @@ async def test_get_tasks(client: AsyncClient):
     assert response_get.status_code == 200
     assert isinstance(response_get.json(), list)
     assert len(response_get.json()) >= 1
+
+async def test_get_task_not_found(client: AsyncClient):
+    token = await get_auth_token(client)
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = await client.get(
+        "/api/v1/tasks/99999",
+        headers=headers
+    )
+
+    assert response.status_code == 404
