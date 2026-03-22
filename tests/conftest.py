@@ -20,18 +20,18 @@ TestSessionLocal = sessionmaker(
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def create_test_database():
     async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
     yield
 
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-
 @pytest_asyncio.fixture
 async def db_session():
-    async with TestSessionLocal() as session:
-        yield session
-        await session.rollback()
+    async with TestSessionLocal() as conn:
+        await conn.begin()
+        async with AsyncSession(bind=conn, expire_on_commit=False) as session:
+            yield session
+            await conn.rollback()
 
 @pytest_asyncio.fixture
 async def client(db_session):
