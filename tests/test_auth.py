@@ -43,3 +43,26 @@ async def test_register_user_duplicate_email(client: AsyncClient):
     assert response2.status_code == 400
 
     assert response2.json()["detail"] != ""
+
+async def test_login_user(client: AsyncClient):
+    response_register = await client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "test@example.com",
+            "password": "testpassword123",
+            "full_name": "Test User"
+        }
+    )
+
+    response_login = await client.post(
+        "/api/v1/auth/login",
+        data={
+            "username": "test@example.com",
+            "password": "testpassword123"
+        }
+    )
+
+    assert response_login.status_code == 200
+    assert response_login.json()["access_token"] != ""
+    assert response_login.json()["token_type"] == "bearer"
+    

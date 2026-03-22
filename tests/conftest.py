@@ -12,9 +12,6 @@ TEST_DATABASE_URL = "postgresql+asyncpg://taskuser:taskpassword@db:5432/taskdb_t
 
 @pytest_asyncio.fixture(autouse=True)
 async def setup_database():
-    # Tworzymy silnik i tabele przed każdym testem
-    # scope="function" = fresh engine dla każdego testu
-    # eliminuje problem z event loop
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 
     async with engine.begin() as conn:
@@ -22,7 +19,6 @@ async def setup_database():
 
     yield engine
 
-    # Czyścimy tabele po każdym teście
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
