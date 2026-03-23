@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
+from typing import List, Optional
 from datetime import datetime, timezone
 
 from app.core.database import get_db
@@ -27,9 +27,9 @@ router = APIRouter(
     status_code=status.HTTP_200_OK,
     summary="Pobierz wszystkie zadania",
 )
-async def get_tasks(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user), page: int = 1, size: int = 10):
+async def get_tasks(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user), page: int = 1, size: int = 10, status: Optional[TaskStatus] = None):
     pagination = PaginationParams(page=page, size=size)
-    return await task_service.get_tasks_paginated(db, pagination)
+    return await task_service.get_tasks_paginated(db, pagination, status)
 
 
 @router.get(
