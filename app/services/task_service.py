@@ -39,7 +39,7 @@ async def get_tasks_paginated(
 
     if status is not None:
         base_query = base_query.where(Task.status == status)
-        count_query = count_query.where(Task.status) == status
+        count_query = count_query.where(Task.status == status)
 
     count_result = await db.execute(count_query)
     total = count_result.scalar()
