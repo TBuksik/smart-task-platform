@@ -25,6 +25,7 @@ async def test_create_task(client: AsyncClient):
     assert data["id"] is not None
     assert data["created_at"] is not None
 
+
 async def test_get_tasks(client: AsyncClient):
     token = await get_auth_token(client)
 
@@ -45,9 +46,12 @@ async def test_get_tasks(client: AsyncClient):
         headers=headers
     )
 
+    data = response_get.json()
+
     assert response_get.status_code == 200
     assert isinstance(response_get.json(), list)
     assert len(response_get.json()) >= 1
+
 
 async def test_get_task_not_found(client: AsyncClient):
     token = await get_auth_token(client)
@@ -60,6 +64,26 @@ async def test_get_task_not_found(client: AsyncClient):
     )
 
     assert response.status_code == 404
+
+
+async def test_get_tasks_paginated(client: AsyncClient):
+    token = await get_auth_token(client)
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    for title in ["Zadanie 1", "Zadanie 2", "Zadanie 3"]:
+        await client.post("/api/v1/tasks", headers=headers, json={"title": title})
+
+    response_get = await client.get(
+        "/api/v1/tasks/?page=1&size=2",
+        headers=headers
+    )
+
+    assert response_get.status_code == 200
+    assert len(response_get.json()["items"]) == 2
+    assert response_get.json()["total"] == 3
+    assert response_get.json()["pages"] == 2
+
 
 async def test_update_task(client: AsyncClient):
     token = await get_auth_token(client)
@@ -87,6 +111,7 @@ async def test_update_task(client: AsyncClient):
 
     assert response_update.status_code == 200
     assert response_update.json()["title"] == "Zaktualizowano zadanie"
+
 
 async def test_delete_task(client: AsyncClient):
     token = await get_auth_token(client)
