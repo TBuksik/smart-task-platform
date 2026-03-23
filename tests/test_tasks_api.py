@@ -75,8 +75,10 @@ async def test_update_task(client: AsyncClient):
         }
     )
 
+    task_id = response_create.json()["id"]
+
     response_update = await client.put(
-        "/api/v1/tasks/{id}",
+        f"/api/v1/tasks/{task_id}",
         headers=headers,
         json={
             "title": "Zaktualizowano zadanie"
@@ -85,3 +87,33 @@ async def test_update_task(client: AsyncClient):
 
     assert response_update.status_code == 200
     assert response_update.json()["title"] == "Zaktualizowano zadanie"
+
+async def test_delete_task(client: AsyncClient):
+    token = await get_auth_token(client)
+
+    headers = {"Authorization": f"Bearer {token}"}
+    response_create = await client.post(
+        "/api/v1/tasks/",
+        headers=headers,
+        json={
+            "title": "Testowe zadanie",
+            "description": "Opis zadania",
+            "schedule": "codziennie o 8:00"
+        }
+    )
+
+    task_id = response_create.json()["id"]
+
+    response_delete = await client.delete(
+        f"/api/v1/tasks/{task_id}",
+        headers=headers
+    )
+
+    assert response_delete.status_code == 204
+    
+    response_get = await client.get(
+        f"/api/v1/tasks/{task_id}",
+        headers=headers
+    )
+
+    assert response_get.status_code == 404
