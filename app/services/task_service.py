@@ -35,7 +35,7 @@ async def get_tasks_paginated(
         status: Optional[TaskStatus] = None
 ) -> dict:
     base_query = select(Task)
-    count_query = select(func.count()).select_from(Task)
+    count_query = select(func.count(Task.id))
 
     if status is not None:
         base_query = base_query.where(Task.status == status)
