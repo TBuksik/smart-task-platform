@@ -2,7 +2,7 @@ import math
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.task import Task
-from app.schemas.task import TaskCreate, TaskUpdate
+from app.schemas.task import TaskCreate, TaskStatus, TaskUpdate
 from app.schemas.pagination import PaginationParams
 
 from sqlalchemy import select
@@ -15,6 +15,7 @@ async def create_task(db: AsyncSession, task_data: TaskCreate) -> Task:
     await db.refresh(db_task)
     return db_task
 
+# ------------
 
 async def get_task(db: AsyncSession, task_id: int) -> Optional[Task]:
     result = await db.execute(
@@ -30,15 +31,21 @@ async def get_tasks(db: AsyncSession) -> List[Task]:
 
 async def get_tasks_paginated(
         db: AsyncSession,
-        pagination: PaginationParams
+        pagination: PaginationParams,
+        status: Optional[TaskStatus] = None
 ) -> dict:
-    count_result = await db.execute(
-        select(func.count()).select_from(Task)
-    )
+    base_query = select(Task)
+    count_query = select(func.count()).select_from(Task)
+
+    if status is not None:
+        base_query = base_query.where(Task.status == status)
+        count_query = count_query.where(Task.status) == status
+
+    count_result = await db.execute(count_query)
     total = count_result.scalar()
 
     result = await db.execute(
-        select(Task)
+        base_query
         .offset(pagination.offset)
         .limit(pagination.size)
     )
@@ -53,6 +60,8 @@ async def get_tasks_paginated(
         "size": pagination.size,
         "pages": pages
     }
+
+# ------------
 
 async def update_task(
         db: AsyncSession,
@@ -73,6 +82,7 @@ async def update_task(
     await db.refresh(db_task)
     return db_task
 
+# ------------
 
 async def delete_task(db: AsyncSession, task_id: int) -> bool:
     db_task = await get_task(db, task_id)

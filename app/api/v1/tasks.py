@@ -31,6 +31,7 @@ async def get_tasks(db: AsyncSession = Depends(get_db), current_user: User = Dep
     pagination = PaginationParams(page=page, size=size)
     return await task_service.get_tasks_paginated(db, pagination)
 
+
 @router.get(
     "/{task_id}",
     response_model=TaskResponse,
@@ -44,6 +45,7 @@ async def get_task(task_id: int, db: AsyncSession = Depends(get_db), current_use
         raise HTTPException(status_code=404, detail="Task not found.")
     
     return result
+
 
 @router.get(
     "/{task_id}/parse-schedule",
@@ -66,6 +68,7 @@ async def parse_schedule(task_id: int, db: AsyncSession = Depends(get_db), curre
         "schedule_text": db_task.schedule,
         "parsed": ai_result
     }
+
 
 @router.get(
     "/{task_id}/status/{celery_task_id}",
