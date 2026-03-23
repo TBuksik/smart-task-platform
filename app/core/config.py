@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     GOOGLE_CALENDAR_ID: str = ""
     GOOGLE_CREDENTIALS_FILE: str = "google_credentials.json"
 
+    # --- Google OAuth2 ---
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+
     class Config:
         env_file = ".env"
         case_sensitive = False
