@@ -60,3 +60,28 @@ async def test_get_task_not_found(client: AsyncClient):
     )
 
     assert response.status_code == 404
+
+async def test_update_task(client: AsyncClient):
+    token = await get_auth_token(client)
+
+    headers = {"Authorization": f"Bearer {token}"}
+    response_create = await client.post(
+        "/api/v1/tasks/",
+        headers=headers,
+        json={
+            "title": "Testowe zadanie",
+            "description": "Opis zadania",
+            "schedule": "codziennie o 8:00"
+        }
+    )
+
+    response_update = await client.put(
+        "/api/v1/tasks/{id}",
+        headers=headers,
+        json={
+            "title": "Zaktualizowano zadanie"
+        }
+    )
+
+    assert response_update.status_code == 200
+    assert response_update.json()["title"] == "Zaktualizowano zadanie"
