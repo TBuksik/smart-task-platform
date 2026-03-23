@@ -49,8 +49,8 @@ async def test_get_tasks(client: AsyncClient):
     data = response_get.json()
 
     assert response_get.status_code == 200
-    assert isinstance(response_get.json(), list)
-    assert len(response_get.json()) >= 1
+    assert "items" in data
+    assert len(data["items"]) >= 1
 
 
 async def test_get_task_not_found(client: AsyncClient):
@@ -72,7 +72,7 @@ async def test_get_tasks_paginated(client: AsyncClient):
     headers = {"Authorization": f"Bearer {token}"}
 
     for title in ["Zadanie 1", "Zadanie 2", "Zadanie 3"]:
-        await client.post("/api/v1/tasks", headers=headers, json={"title": title})
+        await client.post("/api/v1/tasks/", headers=headers, json={"title": title})
 
     response_get = await client.get(
         "/api/v1/tasks/?page=1&size=2",
