@@ -1,9 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
 
 from app.core.database import get_db
 from app.core.security import create_access_token
+from app.core.oauth import oauth
+from app.core.config import settings
 from app.schemas.user import UserCreate, UserResponse, UserLogin
 from app.services import user_service
 
@@ -47,3 +51,11 @@ async def login(
 
     token = create_access_token(data={"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
+
+# ---------
+
+@router.get("/google/login")
+async def google_login(request: Request):
+    redirect_uri = settings.GOOGLE_REDIRECT_URI
+
+    return await oauth.google.authorize_redirect(request, redirect_uri)
