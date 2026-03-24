@@ -3,6 +3,7 @@ from app.core.config import settings
 from app.api.v1 import tasks, auth
 
 from prometheus_fastapi_instrumentator import Instrumentator
+from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -14,6 +15,11 @@ app = FastAPI(
 
 app.include_router(tasks.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1")
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.SECRET_KEY
+)
 
 Instrumentator().instrument(app).expose(app)
 
