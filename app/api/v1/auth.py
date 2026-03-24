@@ -1,3 +1,4 @@
+import secrets
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +11,7 @@ from app.core.oauth import oauth
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserResponse, UserLogin
 from app.services import user_service
+from app.schemas.user import UserCreate
 
 router = APIRouter(
     prefix="/auth",
@@ -31,6 +33,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
         )
     
     return await user_service.create_user(db, user_data)
+
 
 @router.post(
     "/login",
@@ -59,3 +62,22 @@ async def google_login(request: Request):
     redirect_uri = settings.GOOGLE_REDIRECT_URI
 
     return await oauth.google.authorize_redirect(request, redirect_uri)
+
+
+@router.get("/google/callback")
+async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
+    token = await oauth.google.authorize_access_token(request)
+    userinfo = token.get("userinfo")
+
+    user = await user_service.get_user_by_email(db, userinfo["email"])
+
+    if user is None:
+        user_data = UserCreate(
+            email=userinfo["email"],
+            password=secrets.token_urlsafe(32),
+            full_name=userinfo.get("name")
+        )
+        user = await user_service.create_user(db, user_data)
+    
+    jwt_token = create_access_token(data={"sub": user.email})
+    return {"access_token": jwt_token, "token_type": "bearer"}
