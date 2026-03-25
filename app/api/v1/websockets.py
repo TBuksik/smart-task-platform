@@ -30,3 +30,15 @@ class ConnectionManager:
                 await websocket.send_text(json.dumps(message))
 
 manager = ConnectionManager()
+
+@router.websocket("/{user_id}")
+async def websocked_endpoint(websocket: WebSocket, user_id: str):
+    await manager.connect(websocket, user_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Echo: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, user_id)
+        
+        
