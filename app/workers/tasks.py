@@ -1,10 +1,11 @@
-from os import name
-
 from app.workers.celery_app import celery_app
 from app.core.email import send_email
+from app.core.config import settings
 from app.services.calendar_service import get_weekly_events
 import logging
 import asyncio
+import redis as redis_client
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -26,5 +27,15 @@ def send_weekly_report(user_email: str):
         "Raport tygodniowy",
         events_html
     ))
-    
+
+    r = redis_client.from_url(settings.REDIS_URL)
+
+    channel = f"task_completed:{user_email}"
+
+    r.publish(channel, json.dumps({
+        "status": "completed",
+        "email": user_email,
+        "events_count": len(events)
+    }))
+
     return {"status": "sent", "email": user_email}
