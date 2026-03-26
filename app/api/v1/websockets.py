@@ -8,7 +8,7 @@ router = APIRouter(
 )
 
 class ConnectionManager:
-    def __int__(self):
+    def __init__(self):
         self.active_connections: Dict[str, List[WebSocket]] = {}
 
     async def connect(self, websocket: WebSocket, user_id: str):
