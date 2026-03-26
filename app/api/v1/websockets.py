@@ -1,6 +1,8 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import Dict, List
+from app.core.config import settings
 import json
+import redis.asyncio as aioredis
 
 router = APIRouter(
     prefix="/ws",
@@ -42,3 +44,13 @@ async def websocked_endpoint(websocket: WebSocket, user_id: str):
         manager.disconnect(websocket, user_id)
         
         
+@router.websocket("/{user_email}")
+async def task_notifications(websocket: WebSocket, user_email: str):
+    await websocket.accept()
+    r = aioredis.from_url(settings.REDIS_URL)
+    pubsub = r.pubsub()
+    await pubsub.subscribe(f"task_completed:{user_email}")
+
+    async for message in pubsub.listen():
+        if message["type"] == "message":
+            await websocket.send_text(message["data"])
