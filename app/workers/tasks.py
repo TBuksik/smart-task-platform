@@ -14,6 +14,7 @@ def check_pending_tasks():
     logger.info("Sprawdzam zadania oczekujące...")
     return {"status": "ok", "checked": True}
 
+
 @celery_app.task(name="app.workers.tasks.send_weekly_report")
 def send_weekly_report(user_email: str):
     events = get_weekly_events()
