@@ -1,14 +1,29 @@
 import { useState } from 'react'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [tasks, setTasks] = useState([])
+  const [inputValue, setInputValue] = useState('')
+
+  function addTask() {
+    if (inputValue === '') return
+    setTasks([...tasks, inputValue])
+    setInputValue('')
+  }
 
   return (
     <div>
       <h1>Smart Task Platform</h1>
-      <p>Licznik: {count}</p>
-      <button onClick={() => setCount(count + 1)}>Dodaj</button>
-      <button onClick={() => setCount(0)}>Reset</button>
+      <input
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        placeholder="Nazwa zadania"
+      />
+      <button onClick={addTask}>Dodaj zadanie</button>
+      <ul>
+        {tasks.map((task, index) => (
+          <li key={index}>{task}</li>
+        ))}
+      </ul>
     </div>
   )
 }
