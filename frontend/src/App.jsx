@@ -26,10 +26,11 @@ function App() {
     if (token === '') return
     fetchTasks()
 
-    const ws = new WebSocket(`ws://localhost:8000/api/v1/ws/tasks?token=${token}`)
+    const ws = new WebSocket(`ws://localhost:5173/api/v1/ws/tasks/test?token=${token}`)
 
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data)
+    ws.onmessage = async (event) => {
+      const text = typeof event.data === 'string' ? event.data : await event.data.text()
+      const message = JSON.parse(text)
       setNotifications((prev) => [...prev, message])
       fetchTasks()
     }

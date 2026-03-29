@@ -16,7 +16,7 @@ app = FastAPI(
 
 app.include_router(tasks.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1")
-app.include_router(websockets.router)
+app.include_router(websockets.router, prefix="/api/v1")
 
 app.add_middleware(
     SessionMiddleware,

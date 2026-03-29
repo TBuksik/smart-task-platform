@@ -4,6 +4,9 @@ from app.core.config import settings
 from urllib.parse import unquote
 import json
 import redis.asyncio as aioredis
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/ws",
@@ -47,6 +50,7 @@ async def websocked_endpoint(websocket: WebSocket, user_id: str):
         
 @router.websocket("/tasks/{user_email}")
 async def task_notifications(websocket: WebSocket, user_email: str):
+    logger.info(f"Websocket połączony: {user_email}")
     await websocket.accept()
     user_email = unquote(user_email)
     r = aioredis.from_url(settings.REDIS_URL)
@@ -54,5 +58,6 @@ async def task_notifications(websocket: WebSocket, user_email: str):
     await pubsub.subscribe(f"task_completed:{user_email}")
 
     async for message in pubsub.listen():
+        logger.info(f"Wiadomość z Redis: {message}")
         if message["type"] == "message":
             await websocket.send_text(message["data"])

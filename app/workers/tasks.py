@@ -12,6 +12,15 @@ logger = logging.getLogger(__name__)
 @celery_app.task(name="app.workers.tasks.check_pending_tasks")
 def check_pending_tasks():
     logger.info("Sprawdzam zadania oczekujące...")
+    logger.info(f"REDIS_URL: {settings.REDIS_URL}")
+    r = redis_client.from_url(settings.REDIS_URL)
+
+    channel = "task_completed:test"
+
+    r.publish(channel, json.dumps({
+        "status": "completed",
+    }))
+
     return {"status": "ok", "checked": True}
 
 
