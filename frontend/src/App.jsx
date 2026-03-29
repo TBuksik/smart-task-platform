@@ -1,23 +1,39 @@
 import { useState, useEffect } from 'react'
 
 function App() {
-  const [tasks, setTasks] = useState([])
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [token, setToken] = useState('')
 
-  useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/todos?_limit=5')
+  function login() {
+    const formData = new URLSearchParams()
+    formData.append('username', email)
+    formData.append('password', password)
+    fetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData,
+    })
       .then((response) => response.json())
-      .then((data) => setTasks(data))
-  }, [])
+      .then((data) => setToken(data.access_token))
+  }
 
   return (
     <div>
       <h1>Smart Task Platform</h1>
-      <ul>
-        {tasks.map((task) => (
-          <li key={task.id}>{task.title}</li>
-        ))}
-      </ul>
-      <p>Liczba zadań: {tasks.length}</p>
+      <input
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder='Email'
+      />
+      <input
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder='Hasło'
+        type='password'
+      />
+      <button onClick={login}>Zaloguj</button>
+      {token ? <p>Zalogowano pomyślnie</p> : <p>Niezalogowany</p>}
     </div>
   )
 }
