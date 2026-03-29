@@ -4,11 +4,13 @@ function App() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [token, setToken] = useState('')
+  const [tasks, setTasks] = useState([])
 
   function login() {
     const formData = new URLSearchParams()
     formData.append('username', email)
     formData.append('password', password)
+
     fetch('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -17,6 +19,15 @@ function App() {
       .then((response) => response.json())
       .then((data) => setToken(data.access_token))
   }
+
+  useEffect(() => {
+    if (token === '') return
+    fetch('/api/v1/tasks/', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+      .then((response) => response.json())
+      .then((data) => setTasks(data.items))
+  }, [token])
 
   return (
     <div>
@@ -33,7 +44,12 @@ function App() {
         type='password'
       />
       <button onClick={login}>Zaloguj</button>
-      {token ? <p>Zalogowano pomyślnie</p> : <p>Niezalogowany</p>}
+      {token && <p>Zalogowano pomyślnie</p>}
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.id}>{task.title} - {task.status}</li>
+        ))}
+      </ul>
     </div>
   )
 }
