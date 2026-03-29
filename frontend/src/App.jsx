@@ -5,6 +5,7 @@ function App() {
   const [password, setPassword] = useState('')
   const [token, setToken] = useState('')
   const [tasks, setTasks] = useState([])
+  const [newTask, setNewTask] = useState('')
 
   function login() {
     const formData = new URLSearchParams()
@@ -22,12 +23,33 @@ function App() {
 
   useEffect(() => {
     if (token === '') return
+    fetchTasks()
+  }, [token])
+
+  function fetchTasks() {
     fetch('/api/v1/tasks/', {
       headers: { 'Authorization': `Bearer ${token}` },
     })
       .then((response) => response.json())
       .then((data) => setTasks(data.items))
-  }, [token])
+  }
+
+  function addTask() {
+    if (newTask === '') return
+    fetch('/api/v1/tasks/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ title: newTask, description: '' }),
+    })
+      .then((response) => response.json())
+      .then(() => {
+        setNewTask('')
+        fetchTasks()
+      })
+  }
 
   return (
     <div>
@@ -44,12 +66,22 @@ function App() {
         type='password'
       />
       <button onClick={login}>Zaloguj</button>
-      {token && <p>Zalogowano pomyślnie</p>}
-      <ul>
-        {tasks.map((task) => (
-          <li key={task.id}>{task.title} - {task.status}</li>
-        ))}
-      </ul>
+      {token && (
+        <div>
+          <p>Zalogowano pomyślnie</p>
+          <input
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+            placeholder='Nowe zadanie'
+          />
+          <button onClick={addTask}>Dodaj zadanie</button>
+          <ul>
+            {tasks.map((task) => (
+              <li key={task.id}>{task.title} - {task.status}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }
