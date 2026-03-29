@@ -1,29 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function App() {
   const [tasks, setTasks] = useState([])
-  const [inputValue, setInputValue] = useState('')
 
-  function addTask() {
-    if (inputValue === '') return
-    setTasks([...tasks, inputValue])
-    setInputValue('')
-  }
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/todos?_limit=5')
+      .then((response) => response.json())
+      .then((data) => setTasks(data))
+  }, [])
 
   return (
     <div>
       <h1>Smart Task Platform</h1>
-      <input
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        placeholder="Nazwa zadania"
-      />
-      <button onClick={addTask}>Dodaj zadanie</button>
       <ul>
-        {tasks.map((task, index) => (
-          <li key={index}>{task}</li>
+        {tasks.map((task) => (
+          <li key={task.id}>{task.title}</li>
         ))}
       </ul>
+      <p>Liczba zadań: {tasks.length}</p>
     </div>
   )
 }
