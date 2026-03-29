@@ -6,6 +6,7 @@ function App() {
   const [token, setToken] = useState('')
   const [tasks, setTasks] = useState([])
   const [newTask, setNewTask] = useState('')
+  const [notifications, setNotifications] = useState([])
 
   function login() {
     const formData = new URLSearchParams()
@@ -24,6 +25,16 @@ function App() {
   useEffect(() => {
     if (token === '') return
     fetchTasks()
+
+    const ws = new WebSocket(`ws://localhost:8000/api/v1/ws/tasks?token=${token}`)
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data)
+      setNotifications((prev) => [...prev, message])
+      fetchTasks()
+    }
+
+    return () => ws.close()
   }, [token])
 
   function fetchTasks() {
@@ -78,6 +89,12 @@ function App() {
           <ul>
             {tasks.map((task) => (
               <li key={task.id}>{task.title} - {task.status}</li>
+            ))}
+          </ul>
+          <h2>Powiadomienia</h2>
+          <ul>
+            {notifications.map((n, index) => (
+              <li key={index}>{JSON.stringify(n)}</li>
             ))}
           </ul>
         </div>
