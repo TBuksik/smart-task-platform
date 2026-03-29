@@ -4,6 +4,7 @@ venv/
 
 # Zmienne środowiskowe — NIGDY nie commituj haseł!
 .env
+k8s/secret.yaml
 
 # Cache Pythona — generowany automatycznie, nie potrzebny w repo
 __pycache__/
