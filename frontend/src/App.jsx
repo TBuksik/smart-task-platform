@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
+import Login from './components/Login'
+import Dashboard from './components/Dashboard'
+import './App.css'
 
 function App() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [token, setToken] = useState('')
-  const [tasks, setTasks] = useState([])
-  const [newTask, setNewTask] = useState('')
-  const [notifications, setNotifications] = useState([])
+  const [userEmail, setUserEmail] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [loginError, setLoginError] = useState('')
 
-  function login() {
+  function login(email, password) {
+    setIsLoading(true)
+    setLoginError('')
     const formData = new URLSearchParams()
     formData.append('username', email)
     formData.append('password', password)
@@ -19,86 +22,29 @@ function App() {
       body: formData,
     })
       .then((response) => response.json())
-      .then((data) => setToken(data.access_token))
-  }
-
-  useEffect(() => {
-    if (token === '') return
-    fetchTasks()
-
-    const ws = new WebSocket(`ws://localhost:5173/api/v1/ws/tasks/test?token=${token}`)
-
-    ws.onmessage = async (event) => {
-      const text = typeof event.data === 'string' ? event.data : await event.data.text()
-      const message = JSON.parse(text)
-      setNotifications((prev) => [...prev, message])
-      fetchTasks()
-    }
-
-    return () => ws.close()
-  }, [token])
-
-  function fetchTasks() {
-    fetch('/api/v1/tasks/', {
-      headers: { 'Authorization': `Bearer ${token}` },
-    })
-      .then((response) => response.json())
-      .then((data) => setTasks(data.items))
-  }
-
-  function addTask() {
-    if (newTask === '') return
-    fetch('/api/v1/tasks/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ title: newTask, description: '' }),
-    })
-      .then((response) => response.json())
-      .then(() => {
-        setNewTask('')
-        fetchTasks()
+      .then((data) => {
+        if (data.access_token) {
+          setToken(data.access_token)
+          setUserEmail(email)
+        } else {
+          setLoginError('Nieprawidłowy email lub hasło')
+        }
       })
+      .catch(() => setLoginError('Błąd połączenia z serwerem'))
+      .finally(() => setIsLoading(false))
+  }
+
+  function logout() {
+    setToken('')
+    setUserEmail('')
   }
 
   return (
-    <div>
-      <h1>Smart Task Platform</h1>
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder='Email'
-      />
-      <input
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder='Hasło'
-        type='password'
-      />
-      <button onClick={login}>Zaloguj</button>
-      {token && (
-        <div>
-          <p>Zalogowano pomyślnie</p>
-          <input
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-            placeholder='Nowe zadanie'
-          />
-          <button onClick={addTask}>Dodaj zadanie</button>
-          <ul>
-            {tasks.map((task) => (
-              <li key={task.id}>{task.title} - {task.status}</li>
-            ))}
-          </ul>
-          <h2>Powiadomienia</h2>
-          <ul>
-            {notifications.map((n, index) => (
-              <li key={index}>{JSON.stringify(n)}</li>
-            ))}
-          </ul>
-        </div>
+    <div className="app">
+      {!token ? (
+        <Login onLogin={login} isLoading={isLoading} error={loginError} />
+      ) : (
+        <Dashboard token={token} userEmail={userEmail} onLogout={logout} />
       )}
     </div>
   )
