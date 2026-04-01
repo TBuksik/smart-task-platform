@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Notifications from './components/Notifications'
+import TaskList from './components/TaskList'
 
 function App() {
   const [email, setEmail] = useState('')
@@ -88,11 +89,7 @@ function App() {
             placeholder='Nowe zadanie'
           />
           <button onClick={addTask}>Dodaj zadanie</button>
-          <ul>
-            {tasks.map((task) => (
-              <li key={task.id}>{task.title} - {task.status}</li>
-            ))}
-          </ul>
+          <TaskList taskList={tasks}/>
           <Notifications notifications={notifications}/>
         </div>
       )}
