@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Notifications from './components/Notifications'
 
 function App() {
   const [email, setEmail] = useState('')
@@ -92,12 +93,7 @@ function App() {
               <li key={task.id}>{task.title} - {task.status}</li>
             ))}
           </ul>
-          <h2>Powiadomienia</h2>
-          <ul>
-            {notifications.map((n, index) => (
-              <li key={index}>{JSON.stringify(n)}</li>
-            ))}
-          </ul>
+          <Notifications notifications={notifications}/>
         </div>
       )}
     </div>
