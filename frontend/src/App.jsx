@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react'
 import Notifications from './components/Notifications'
 import TaskList from './components/TaskList'
+import LoginForm from './components/LoginForm'
 
 function App() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [token, setToken] = useState('')
   const [tasks, setTasks] = useState([])
   const [newTask, setNewTask] = useState('')
   const [notifications, setNotifications] = useState([])
 
-  function login() {
+  function login(email, password) {
     const formData = new URLSearchParams()
     formData.append('username', email)
     formData.append('password', password)
@@ -68,18 +67,7 @@ function App() {
   return (
     <div>
       <h1>Smart Task Platform</h1>
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder='Email'
-      />
-      <input
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder='Hasło'
-        type='password'
-      />
-      <button onClick={login}>Zaloguj</button>
+      <LoginForm onLogin={login}/>
       {token && (
         <div>
           <p>Zalogowano pomyślnie</p>
