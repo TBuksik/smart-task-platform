@@ -24,6 +24,10 @@
 }
 
 .statusCompleted {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
   background-color: #ede7f6;
-  color: #4527a0;
+  color: #7c6fd6;
 }
