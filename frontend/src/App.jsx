@@ -8,8 +8,13 @@ function App() {
   const [token, setToken] = useState('')
   const [tasks, setTasks] = useState([])
   const [notifications, setNotifications] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
 
   function login(email, password) {
+    setLoading(true)
+    setError('')
     const formData = new URLSearchParams()
     formData.append('username', email)
     formData.append('password', password)
@@ -19,9 +24,20 @@ function App() {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: formData,
     })
-      .then((response) => response.json())
-      .then((data) => setToken(data.access_token))
+      .then((response) => {
+        if (!response.ok) throw new Error('Nieprawidłowy email lub hasło')
+        return response.json()
+      })
+      .then((data) => {
+        setToken(data.access_token)
+        setLoading(false)
+      })
+      .catch((err) => {
+        setError(err.message)
+        setLoading(false)
+      })
   }
+
 
   useEffect(() => {
     if (token === '') return
@@ -39,6 +55,7 @@ function App() {
     return () => ws.close()
   }, [token])
 
+
   function fetchTasks() {
     fetch('/api/v1/tasks/', {
       headers: { 'Authorization': `Bearer ${token}` },
@@ -46,6 +63,7 @@ function App() {
       .then((response) => response.json())
       .then((data) => setTasks(data.items))
   }
+
 
   function addTask(newTask) {
     if (newTask === '') return
@@ -63,10 +81,13 @@ function App() {
       })
   }
 
+
   return (
     <div>
       <h1>Smart Task Platform</h1>
       <LoginForm onLogin={login}/>
+      {loading && <p>Ładowanie...</p>}
+      {error && <p>{error}</p>}
       {token && (
         <div>
           <p>Zalogowano pomyślnie</p>
