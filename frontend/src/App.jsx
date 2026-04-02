@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import Notifications from './components/Notifications'
 import TaskList from './components/TaskList'
 import LoginForm from './components/LoginForm'
+import AddTaskForm from './components/AddTaskForm'
 
 function App() {
   const [token, setToken] = useState('')
   const [tasks, setTasks] = useState([])
-  const [newTask, setNewTask] = useState('')
   const [notifications, setNotifications] = useState([])
 
   function login(email, password) {
@@ -47,7 +47,7 @@ function App() {
       .then((data) => setTasks(data.items))
   }
 
-  function addTask() {
+  function addTask(newTask) {
     if (newTask === '') return
     fetch('/api/v1/tasks/', {
       method: 'POST',
@@ -59,7 +59,6 @@ function App() {
     })
       .then((response) => response.json())
       .then(() => {
-        setNewTask('')
         fetchTasks()
       })
   }
@@ -71,12 +70,7 @@ function App() {
       {token && (
         <div>
           <p>Zalogowano pomyślnie</p>
-          <input
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-            placeholder='Nowe zadanie'
-          />
-          <button onClick={addTask}>Dodaj zadanie</button>
+          <AddTaskForm onAdd={addTask}/>
           <TaskList taskList={tasks}/>
           <Notifications notifications={notifications}/>
         </div>
