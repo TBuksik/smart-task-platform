@@ -13,6 +13,9 @@ function App() {
 
 
   function login(email, password) {
+    setToken('')
+    setTasks([])
+    setNotifications([])
     setLoading(true)
     setError('')
     const formData = new URLSearchParams()
@@ -82,6 +85,14 @@ function App() {
   }
 
 
+  function clearStates() {
+    setToken('')
+    setTasks([])
+    setNotifications([])
+    setError('')
+  }
+
+
   return (
     <div>
       <h1>Smart Task Platform</h1>
@@ -90,6 +101,7 @@ function App() {
       {error && <p>{error}</p>}
       {token && (
         <div>
+          <button onClick={clearStates}>Wyloguj</button>
           <p>Zalogowano pomyślnie</p>
           <AddTaskForm onAdd={addTask}/>
           <TaskList taskList={tasks}/>
