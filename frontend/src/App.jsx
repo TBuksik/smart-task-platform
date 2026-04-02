@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react'
-import Notifications from './components/Notifications'
-import TaskList from './components/TaskList'
-import LoginForm from './components/LoginForm'
-import AddTaskForm from './components/AddTaskForm'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
 
-function App() {
+function AppContent() {
   const [token, setToken] = useState('')
   const [tasks, setTasks] = useState([])
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const navigate = useNavigate()
 
 
   function login(email, password) {
@@ -34,11 +34,21 @@ function App() {
       .then((data) => {
         setToken(data.access_token)
         setLoading(false)
+        navigate('/dashboard')
       })
       .catch((err) => {
         setError(err.message)
         setLoading(false)
       })
+  }
+
+
+  function logout() {
+    setToken('')
+    setTasks([])
+    setNotifications([])
+    setError('')
+    navigate('/')
   }
 
 
@@ -85,30 +95,22 @@ function App() {
   }
 
 
-  function clearStates() {
-    setToken('')
-    setTasks([])
-    setNotifications([])
-    setError('')
-  }
-
-
   return (
-    <div>
-      <h1>Smart Task Platform</h1>
-      <LoginForm onLogin={login}/>
-      {loading && <p>Ładowanie...</p>}
-      {error && <p>{error}</p>}
-      {token && (
-        <div>
-          <button onClick={clearStates}>Wyloguj</button>
-          <p>Zalogowano pomyślnie</p>
-          <AddTaskForm onAdd={addTask}/>
-          <TaskList taskList={tasks}/>
-          <Notifications notifications={notifications}/>
-        </div>
-      )}
-    </div>
+    <Routes>
+      <Route path="/" element={<LoginPage onLogin={login} error={error} loading={loading} />} />
+      <Route path="/dashboard" element={
+        token ? <DashboardPage tasks={tasks} notifications={notifications} onAdd={addTask} onLogout={logout} />
+              : <Navigate to="/"/>
+      }/>
+    </Routes>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   )
 }
 
