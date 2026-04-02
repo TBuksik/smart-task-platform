@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function AppContent() {
   const [token, setToken] = useState('')
@@ -102,6 +103,7 @@ function AppContent() {
         token ? <DashboardPage tasks={tasks} notifications={notifications} onAdd={addTask} onLogout={logout} />
               : <Navigate to="/"/>
       }/>
+      <Route path='*' element={<NotFoundPage onLogout={logout}/>}/>
     </Routes>
   )
 }
