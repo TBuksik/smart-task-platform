@@ -58,4 +58,4 @@ async def task_notifications(websocket: WebSocket, user_email: str):
 
     async for message in pubsub.listen():
         if message["type"] == "message":
-            await websocket.send_text(message["data"])
+            await websocket.send_text(message["data"].decode('utf-8'))
