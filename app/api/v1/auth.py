@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.core.security import create_access_token, create_refresh_token, decode_refresh_token
 from app.core.oauth import oauth
 from app.core.config import settings
-from app.schemas.user import UserCreate, UserResponse, UserLogin
+from app.schemas.user import UserCreate, UserResponse, UserLogin, RefreshTokenRequest
 from app.services import user_service
 from app.schemas.user import UserCreate
 
@@ -56,17 +56,10 @@ async def login(
     refresh_token = create_refresh_token(data={"sub": user.email})
     return {"access_token": token, "refresh_token": refresh_token, "token_type": "bearer"}
 
-# ---------
 
 @router.post("/refresh", status_code=status.HTTP_200_OK)
-async def refresh(request: Request):
-    body = await request.json()
-    refresh_token = body.get("refresh_token")
-
-    if not refresh_token:
-        raise HTTPException(status_code=401, detail="Brak refresh tokenu")
-
-    email = decode_refresh_token(refresh_token)
+async def refresh(data: RefreshTokenRequest):
+    email = decode_refresh_token(data.refresh_token)
 
     if email is None:
         raise HTTPException(status_code=401, detail="Nieprawidłowy refresh token")
