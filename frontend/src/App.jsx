@@ -6,6 +6,7 @@ import NotFoundPage from './pages/NotFoundPage'
 
 function AppContent() {
   const [token, setToken] = useState('')
+  const [refreshToken, setRefreshToken] = useState('')
   const [tasks, setTasks] = useState([])
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(false)
@@ -34,6 +35,7 @@ function AppContent() {
       })
       .then((data) => {
         setToken(data.access_token)
+        setRefreshToken(data.refresh_token)
         setLoading(false)
         navigate('/dashboard')
       })
@@ -41,6 +43,26 @@ function AppContent() {
         setError(err.message)
         setLoading(false)
       })
+  }
+
+
+  function refreshAccessToken() {
+    return fetch('/api/v1/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken })
+    })
+    .then((response) => {
+      if (!response.ok) {
+        logout()
+        return null
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data) setToken(data.access_token)
+      return data
+    })
   }
 
 
@@ -74,8 +96,16 @@ function AppContent() {
     fetch('/api/v1/tasks/', {
       headers: { 'Authorization': `Bearer ${token}` },
     })
-      .then((response) => response.json())
-      .then((data) => setTasks(data.items))
+      .then((response) => {
+        if (response.status === 401) {
+          refreshAccessToken()
+          return null
+        }
+        return response.json()
+      })
+      .then((data) => {
+        if (data) setTasks(data.items)
+      })
   }
 
 
