@@ -34,3 +34,20 @@ def decode_access_token(token: str) -> Optional[str]:
         return email
     except JWTError:
         return None
+
+def create_refresh_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(days=7)
+    to_encode.update({"exp": expire, "type": "refresh"})
+    token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
+    return token
+
+def decode_refresh_token(token: str) -> Optional[str]:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        if payload.get("type") != "refresh":
+            return None
+        email = payload.get("sub")
+        return email
+    except JWTError:
+        return None
