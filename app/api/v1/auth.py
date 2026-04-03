@@ -1,6 +1,8 @@
 import secrets
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
@@ -12,6 +14,8 @@ from app.core.config import settings
 from app.schemas.user import UserCreate, UserResponse, UserLogin, RefreshTokenRequest
 from app.services import user_service
 from app.schemas.user import UserCreate
+
+limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(
     prefix="/auth",
@@ -35,11 +39,10 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     return await user_service.create_user(db, user_data)
 
 
-@router.post(
-    "/login",
-    status_code=status.HTTP_200_OK
-)
+@router.post("/login",status_code=status.HTTP_200_OK)
+@limiter.limit("5/minute")
 async def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db)
 ):
