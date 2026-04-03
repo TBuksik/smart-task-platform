@@ -6,7 +6,7 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
 from app.core.database import get_db
-from app.core.security import create_access_token
+from app.core.security import create_access_token, create_refresh_token, decode_refresh_token
 from app.core.oauth import oauth
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserResponse, UserLogin
@@ -53,7 +53,26 @@ async def login(
         raise HTTPException(status_code=401, detail="Nieprawidłowy email lub hasło")
 
     token = create_access_token(data={"sub": user.email})
-    return {"access_token": token, "token_type": "bearer"}
+    refresh_token = create_refresh_token(data={"sub": user.email})
+    return {"access_token": token, "refresh_token": refresh_token, "token_type": "bearer"}
+
+# ---------
+
+@router.post("/refresh", status_code=status.HTTP_200_OK)
+async def refresh(request: Request):
+    body = await request.json()
+    refresh_token = body.get("refresh_token")
+
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="Brak refresh tokenu")
+
+    email = decode_refresh_token(refresh_token)
+
+    if email is None:
+        raise HTTPException(status_code=401, detail="Nieprawidłowy refresh token")
+
+    new_access_token = create_access_token(data={"sub": email})
+    return {"access_token": new_access_token, "token_type": "bearer"}
 
 # ---------
 
