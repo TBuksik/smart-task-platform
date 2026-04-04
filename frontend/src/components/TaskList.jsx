@@ -1,6 +1,9 @@
 import styles from './TaskList.module.css'
+import { useState } from 'react'
 
 function TaskList({ taskList, onDelete }) {
+  const [confirmId, setConfirmId] = useState(null)
+
   return (
     <ul className={styles.list}>
       {taskList.map((task) => (
@@ -10,7 +13,9 @@ function TaskList({ taskList, onDelete }) {
             <span className={task.status === 'completed' ? styles.statusCompleted : styles.status}>
               {task.status}
             </span>
-            <button className={styles.deleteButton} onClick={() => onDelete(task.id)}>Usuń</button>
+            {task.id === confirmId ? 
+            <button className={styles.deleteButton} onClick={() => onDelete(task.id)}>Potwierdź usunięcie</button> : 
+            <button className={styles.deleteButton} onClick={() => setConfirmId(task.id)}>Usuń</button>}
           </div>
         </li>
       ))}
