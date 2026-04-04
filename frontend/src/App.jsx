@@ -92,8 +92,12 @@ function AppContent() {
   }, [token])
 
 
-  function fetchTasks() {
-    fetch('/api/v1/tasks/', {
+  function fetchTasks(search = '', status = 'all') {
+    let url = '/api/v1/tasks/?'
+    if (search) url += `search=${search}&`
+    if (status !== 'all') url += `status=${status}&`
+
+    fetch(url, {
       headers: { 'Authorization': `Bearer ${token}` },
     })
       .then((response) => {
@@ -130,8 +134,14 @@ function AppContent() {
     <Routes>
       <Route path="/" element={<LoginPage onLogin={login} error={error} loading={loading} />} />
       <Route path="/dashboard" element={
-        token ? <DashboardPage tasks={tasks} notifications={notifications} onAdd={addTask} onLogout={logout} />
-              : <Navigate to="/"/>
+        token ? 
+        <DashboardPage
+          tasks={tasks} 
+          notifications={notifications} 
+          onAdd={addTask} 
+          onLogout={logout} 
+          onSearch={fetchTasks}
+        /> : <Navigate to="/"/>
       }/>
       <Route path='*' element={<NotFoundPage onLogout={logout}/>}/>
     </Routes>

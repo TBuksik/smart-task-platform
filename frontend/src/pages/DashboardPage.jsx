@@ -5,18 +5,25 @@ import SearchBar from '../components/SearchBar'
 import styles from './DashboardPage.module.css'
 import { useState } from 'react'
 
-function DashboardPage({ tasks, notifications, onAdd, onLogout }) {
+function DashboardPage({ tasks, notifications, onAdd, onLogout, onSearch, onStatusChange }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
-  const filteredTasks = tasks.filter((task) => {
-    const matchesTitle = task.title.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || task.status === statusFilter
-    return matchesTitle && matchesStatus
-  })
+  function handleSearch(value) {
+    setSearchQuery(value)
+    onSearch(value, statusFilter)
+  }
 
-  console.log('searchQuery:', searchQuery)
-  console.log('pierwszy tytuł:', tasks[0]?.title)
+  function handleStatusChange(value) {
+    setStatusFilter(value)
+    onSearch(searchQuery, value)
+  }
+
+  function handleReset() {
+    setSearchQuery('')
+    setStatusFilter('all')
+    onSearch('', 'all')
+  }
 
   return (
     <div className={styles.container}>
@@ -25,16 +32,17 @@ function DashboardPage({ tasks, notifications, onAdd, onLogout }) {
         <button className={styles.button} onClick={onLogout}>Wyloguj</button>
       </div>
       <AddTaskForm onAdd={onAdd} />
-      <SearchBar value={searchQuery} onSearch={setSearchQuery}/>
-      <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+      <SearchBar value={searchQuery} onSearch={handleSearch}/>
+      <select value={statusFilter} onChange={(e) => handleStatusChange(e.target.value)}>
         <option value="all">Wszystkie</option>
         <option value="active">Active</option>
         <option value="completed">Completed</option>
         <option value="pending">Pending</option>
       </select>
-      {(searchQuery != '' || statusFilter != 'all') && <button onClick={() => {setSearchQuery(''), setStatusFilter('all')}}>Resetuj Filtry</button>}
-      <TaskList taskList={filteredTasks} />
-      <p>Znaleziono: {filteredTasks.length} zadań</p>
+      {(searchQuery != '' || statusFilter != 'all') &&
+        <button onClick={handleReset}>Resetuj Filtry</button>}
+      <p>Znaleziono: {tasks.length} zadań</p>
+      <TaskList taskList={tasks} />
       <Notifications notifications={notifications} />
     </div>
   )
