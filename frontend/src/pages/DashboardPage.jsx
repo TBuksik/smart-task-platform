@@ -25,13 +25,14 @@ function DashboardPage({ tasks, notifications, onAdd, onLogout }) {
         <button className={styles.button} onClick={onLogout}>Wyloguj</button>
       </div>
       <AddTaskForm onAdd={onAdd} />
-      <SearchBar onSearch={setSearchQuery}/>
+      <SearchBar value={searchQuery} onSearch={setSearchQuery}/>
       <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
         <option value="all">Wszystkie</option>
         <option value="active">Active</option>
         <option value="completed">Completed</option>
         <option value="pending">Pending</option>
       </select>
+      {(searchQuery != '' || statusFilter != 'all') && <button onClick={() => {setSearchQuery(''), setStatusFilter('all')}}>Resetuj Filtry</button>}
       <TaskList taskList={filteredTasks} />
       <p>Znaleziono: {filteredTasks.length} zadań</p>
       <Notifications notifications={notifications} />

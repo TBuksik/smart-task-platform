@@ -1,20 +1,13 @@
 import { useState } from "react";
 import styles from './SearchBar.module.css'
 
-function SearchBar({ onSearch }) {
-    const [query, setQuery] = useState('')
-
-    function handleChange(e) {
-        setQuery(e.target.value)
-        onSearch(e.target.value)
-    }
-
+function SearchBar({ value, onSearch }) {
     return (
         <div className={styles.container}>
             <input
                 className={styles.input}
-                value={query}
-                onChange={handleChange}
+                value={value}
+                onChange={(e) => onSearch(e.target.value)}
                 placeholder="Szukaj zadań..."
             />
         </div>
