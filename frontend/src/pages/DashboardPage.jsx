@@ -7,10 +7,16 @@ import { useState } from 'react'
 
 function DashboardPage({ tasks, notifications, onAdd, onLogout }) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   const filteredTasks = tasks.filter((task) => {
-    task.title.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesTitle = task.title.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || task.status === statusFilter
+    return matchesTitle && matchesStatus
   })
+
+  console.log('searchQuery:', searchQuery)
+  console.log('pierwszy tytuł:', tasks[0]?.title)
 
   return (
     <div className={styles.container}>
@@ -20,7 +26,14 @@ function DashboardPage({ tasks, notifications, onAdd, onLogout }) {
       </div>
       <AddTaskForm onAdd={onAdd} />
       <SearchBar onSearch={setSearchQuery}/>
+      <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+        <option value="all">Wszystkie</option>
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+        <option value="pending">Pending</option>
+      </select>
       <TaskList taskList={filteredTasks} />
+      <p>Znaleziono: {filteredTasks.length} zadań</p>
       <Notifications notifications={notifications} />
     </div>
   )
