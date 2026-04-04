@@ -5,7 +5,7 @@ import SearchBar from '../components/SearchBar'
 import styles from './DashboardPage.module.css'
 import { useState } from 'react'
 
-function DashboardPage({ tasks, notifications, onAdd, onLogout, onSearch, onStatusChange }) {
+function DashboardPage({ tasks, notifications, onAdd, onLogout, onSearch, onDelete }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
@@ -42,7 +42,7 @@ function DashboardPage({ tasks, notifications, onAdd, onLogout, onSearch, onStat
       {(searchQuery != '' || statusFilter != 'all') &&
         <button onClick={handleReset}>Resetuj Filtry</button>}
       <p>Znaleziono: {tasks.length} zadań</p>
-      <TaskList taskList={tasks} />
+      <TaskList taskList={tasks} onDelete={onDelete}/>
       <Notifications notifications={notifications} />
     </div>
   )

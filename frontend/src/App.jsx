@@ -130,6 +130,17 @@ function AppContent() {
   }
 
 
+  function deleteTask(taskId) {
+    fetch(`/api/v1/tasks/${taskId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+    .then((response) => {
+      if (response.status === 204) fetchTasks()
+    })
+  }
+
+
   return (
     <Routes>
       <Route path="/" element={<LoginPage onLogin={login} error={error} loading={loading} />} />
@@ -141,6 +152,7 @@ function AppContent() {
           onAdd={addTask} 
           onLogout={logout} 
           onSearch={fetchTasks}
+          onDelete={deleteTask}
         /> : <Navigate to="/"/>
       }/>
       <Route path='*' element={<NotFoundPage onLogout={logout}/>}/>
