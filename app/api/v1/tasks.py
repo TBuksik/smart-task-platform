@@ -21,15 +21,17 @@ router = APIRouter(
 
 # ----------
 
-@router.get(
-    "/",
-    response_model=PagedResponse[TaskResponse],
-    status_code=status.HTTP_200_OK,
-    summary="Pobierz wszystkie zadania",
-)
-async def get_tasks(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user), page: int = 1, size: int = 10, status: Optional[TaskStatus] = None):
+@router.get("/", response_model=PagedResponse[TaskResponse], status_code=status.HTTP_200_OK, summary="Pobierz wszystkie zadania")
+async def get_tasks(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    page: int = 1,
+    size: int = 10,
+    status: Optional[TaskStatus] = None,
+    search: Optional[str] = None
+):
     pagination = PaginationParams(page=page, size=size)
-    return await task_service.get_tasks_paginated(db, pagination, status)
+    return await task_service.get_tasks_paginated(db, pagination, status, search)
 
 
 @router.get(

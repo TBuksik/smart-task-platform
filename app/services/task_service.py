@@ -32,7 +32,8 @@ async def get_tasks(db: AsyncSession) -> List[Task]:
 async def get_tasks_paginated(
         db: AsyncSession,
         pagination: PaginationParams,
-        status: Optional[TaskStatus] = None
+        status: Optional[TaskStatus] = None,
+        search: Optional[str] = None
 ) -> dict:
     base_query = select(Task)
     count_query = select(func.count(Task.id))
@@ -40,6 +41,10 @@ async def get_tasks_paginated(
     if status is not None:
         base_query = base_query.where(Task.status == status)
         count_query = count_query.where(Task.status == status)
+
+    if search is not None:
+        base_query = base_query.where(Task.title.ilike(f"%{search}%"))
+        count_query = count_query.where(Task.title.ilike(f"%{search}%"))
 
     count_result = await db.execute(count_query)
     total = count_result.scalar()
