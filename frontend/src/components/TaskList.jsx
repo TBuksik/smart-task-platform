@@ -21,19 +21,23 @@ function TaskList({ taskList, onDelete, onUpdate }) {
     <ul className={styles.list}>
       {taskList.map((task) => (
         <li key={task.id} className={styles.item}>
-          {editId === task.id}
-          ? <input 
-              className={styles.editInput}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-            />
-          : <span>{task.title}</span>
+          {editId === task.id
+            ? <input 
+                className={styles.editInput}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+              />
+            : <span>{task.title}</span>
+          }
           <div className={styles.actions}>
             <span className={task.status === 'completed' ? styles.statusCompleted : styles.status}>
               {task.status}
             </span>
             {editId === task.id
-              ? <button className={styles.editButton} onClick={() => confirmEdit(task.id)}>Zapisz</button>
+              ? <div>
+                  <button className={styles.editButton} onClick={() => confirmEdit(task.id)}>Zapisz</button>
+                  <button className={styles.cancelButton} onClick={() => setEditId(null)}>Anuluj</button>
+                </div> 
               : <button className={styles.editButton} onClick={() => startEdit(task)}>Edytuj</button>
             }
             {task.id === confirmId 
