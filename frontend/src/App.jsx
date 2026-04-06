@@ -140,7 +140,11 @@ function AppContent() {
       body: JSON.stringify({ title: newTitle }),
     })
     .then((response) => response.json())
-    .then(() => fetchTasks())
+    .then((updatedTask) => {
+      setTasks((prev) => prev.map((task) =>
+        task.id === taskId ? updatedTask : task
+      ))
+    })
   }
 
 
