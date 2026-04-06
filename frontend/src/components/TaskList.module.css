@@ -52,3 +52,27 @@
 .deleteButton:hover {
   background-color: #c0392b;
 }
+
+.editInput {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #6c63ff;
+  border-radius: 6px;
+  font-size: 1rem;
+  outline: none;
+  flex: 1;
+}
+
+.editButton {
+  padding: 0.25rem 0.75rem;
+  background-color: #6c63ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.editButton:hover {
+  background-color: #574fd6;
+}

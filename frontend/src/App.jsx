@@ -130,6 +130,20 @@ function AppContent() {
   }
 
 
+  function updateTask(taskId, newTitle) {
+    fetch(`/api/v1/tasks/${taskId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ title: newTitle }),
+    })
+    .then((response) => response.json())
+    .then(() => fetchTasks())
+  }
+
+
   function deleteTask(taskId) {
     fetch(`/api/v1/tasks/${taskId}`, {
       method: 'DELETE',
@@ -153,6 +167,7 @@ function AppContent() {
           onLogout={logout} 
           onSearch={fetchTasks}
           onDelete={deleteTask}
+          onUpdate={updateTask}
         /> : <Navigate to="/"/>
       }/>
       <Route path='*' element={<NotFoundPage onLogout={logout}/>}/>
