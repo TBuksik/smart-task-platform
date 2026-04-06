@@ -1,7 +1,7 @@
 import styles from './TaskList.module.css'
 import { useState } from 'react'
 
-function TaskList({ taskList, onDelete, onUpdate }) {
+function TaskList({ taskList, onDelete, onUpdate, onStatusUpdate }) {
   const [confirmId, setConfirmId] = useState(null)
   const [editId, setEditId] = useState(null)
   const [editValue, setEditValue] = useState('')
@@ -17,6 +17,12 @@ function TaskList({ taskList, onDelete, onUpdate }) {
     setEditValue('')
   }
 
+  function getNextStatus(currentStatus) {
+    if (currentStatus === 'pending') return 'active'
+    if (currentStatus === 'active') return 'completed'
+    return 'pending'
+  }
+
   return (
     <ul className={styles.list}>
       {taskList.map((task) => (
@@ -30,7 +36,11 @@ function TaskList({ taskList, onDelete, onUpdate }) {
             : <span>{task.title}</span>
           }
           <div className={styles.actions}>
-            <span className={task.status === 'completed' ? styles.statusCompleted : styles.status}>
+            <span
+              className={task.status === 'completed' ? styles.statusCompleted : styles.status}
+              onClick={() => onStatusUpdate(task.id, getNextStatus(task.status))}
+              style={{ cursor: 'pointer' }}  
+            >
               {task.status}
             </span>
             {editId === task.id

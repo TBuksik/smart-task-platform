@@ -148,6 +148,24 @@ function AppContent() {
   }
 
 
+  function updateTaskStatus(taskId, newStatus) {
+    fetch(`/api/v1/tasks/${taskId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status: newStatus }),
+    })
+      .then((response) => response.json())
+      .then((updatedTask) => {
+        setTasks((prev) => prev.map((task) =>
+          task.id === taskId ? updatedTask : task
+        ))
+      })
+  }
+
+
   function deleteTask(taskId) {
     fetch(`/api/v1/tasks/${taskId}`, {
       method: 'DELETE',
@@ -172,6 +190,7 @@ function AppContent() {
           onSearch={fetchTasks}
           onDelete={deleteTask}
           onUpdate={updateTask}
+          onStatusUpdate={updateTaskStatus}
         /> : <Navigate to="/"/>
       }/>
       <Route path='*' element={<NotFoundPage onLogout={logout}/>}/>
