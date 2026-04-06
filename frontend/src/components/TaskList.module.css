@@ -24,6 +24,18 @@
   color: #2e7d32;
 }
 
+.statusPaused {
+  margin-left: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: #fff3e0;
+  color: #e65100;
+  text-align: center;
+  cursor: pointer;
+}
+
 .statusCompleted {
   margin-left: 0.75rem;
   padding: 0.25rem 0.75rem;

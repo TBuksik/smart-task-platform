@@ -37,7 +37,11 @@ function TaskList({ taskList, onDelete, onUpdate, onStatusUpdate }) {
           }
           <div className={styles.actions}>
             <span
-              className={task.status === 'completed' ? styles.statusCompleted : styles.status}
+              className={
+                task.status === 'completed' ? styles.statusCompleted :
+                task.status === 'paused' ? styles.statusPaused :
+                styles.status
+              }
               onClick={() => onStatusUpdate(task.id, getNextStatus(task.status))}
               style={{ cursor: 'pointer' }}  
             >
