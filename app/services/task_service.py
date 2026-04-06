@@ -51,6 +51,7 @@ async def get_tasks_paginated(
 
     result = await db.execute(
         base_query
+        .order_by(Task.id)
         .offset(pagination.offset)
         .limit(pagination.size)
     )
