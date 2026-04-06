@@ -36,8 +36,8 @@ function DashboardPage({ tasks, notifications, onAdd, onLogout, onSearch, onDele
       <select value={statusFilter} onChange={(e) => handleStatusChange(e.target.value)}>
         <option value="all">Wszystkie</option>
         <option value="active">Active</option>
+        <option value="paused">Paused</option>
         <option value="completed">Completed</option>
-        <option value="pending">Pending</option>
       </select>
       {(searchQuery != '' || statusFilter != 'all') &&
         <button onClick={handleReset}>Resetuj Filtry</button>}

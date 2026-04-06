@@ -18,9 +18,9 @@ function TaskList({ taskList, onDelete, onUpdate, onStatusUpdate }) {
   }
 
   function getNextStatus(currentStatus) {
-    if (currentStatus === 'pending') return 'active'
-    if (currentStatus === 'active') return 'completed'
-    return 'pending'
+    if (currentStatus === 'active') return 'paused'
+    if (currentStatus === 'paused') return 'completed'
+    return 'active'
   }
 
   return (
