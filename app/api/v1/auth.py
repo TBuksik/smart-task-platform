@@ -8,9 +8,11 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
 from app.core.database import get_db
+from app.core.dependencies import get_current_user
 from app.core.security import create_access_token, create_refresh_token, decode_refresh_token
 from app.core.oauth import oauth
 from app.core.config import settings
+from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserLogin, RefreshTokenRequest
 from app.services import user_service
 from app.schemas.user import UserCreate
@@ -96,3 +98,8 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
     
     jwt_token = create_access_token(data={"sub": user.email})
     return {"access_token": jwt_token, "token_type": "bearer"}
+
+
+@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
+async def get_me(current_user: User = Depends(get_current_user)):
+    return current_user
