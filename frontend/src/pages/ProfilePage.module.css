@@ -60,3 +60,18 @@
   font-size: 14px;
   margin: 0;
 }
+
+.backButton {
+  align-self: flex-start;
+  padding: 0.4rem 0.8rem;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #1a1a2e;
+  transition: background-color 0.2s;
+}
+
+.backButton:hover {
+  background-color: #f0f2f5;
+}
