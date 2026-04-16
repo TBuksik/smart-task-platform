@@ -13,7 +13,7 @@ from app.core.security import create_access_token, create_refresh_token, decode_
 from app.core.oauth import oauth
 from app.core.config import settings
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, UserLogin, RefreshTokenRequest
+from app.schemas.user import UserCreate, UserResponse, UserLogin, RefreshTokenRequest, UserUpdate
 from app.services import user_service
 from app.schemas.user import UserCreate
 
@@ -103,3 +103,14 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
 @router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+# ---------
+
+@router.patch("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
+async def update_me(
+    user_data: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    return await user_service.update_user(db, current_user, user_data)
+
