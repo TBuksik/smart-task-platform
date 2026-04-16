@@ -4,10 +4,12 @@ import styles from './ProfilePage.module.css'
 
 function ProfilePage({ token }) {
     const [user, setUser] = useState(null)
-    const [loading, setLodaing] = useState(true)
+    const [loading, setLoading] = useState(true)
     const [fullName, setFullName] = useState('')
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
+
+    const navigate = useNavigate()
 
     useEffect(() => {
         fetch('/api/v1/auth/me', {
@@ -17,7 +19,7 @@ function ProfilePage({ token }) {
         .then((data) => {
             setUser(data)
             setFullName(data.full_name || '')
-            setLodaing(false)
+            setLoading(false)
         })
     }, [token])
 
@@ -47,8 +49,6 @@ function ProfilePage({ token }) {
             setError(err.message)
         })
     }
-
-    const navigate = useNavigate()
 
     return (
         <div className={styles.container}>
