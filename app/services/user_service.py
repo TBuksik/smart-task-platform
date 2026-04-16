@@ -3,7 +3,7 @@ from sqlalchemy import select
 from typing import Optional
 
 from app.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserUpdate
 from app.core.security import hash_password, verify_password
 
 async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
@@ -34,4 +34,13 @@ async def authenticate_user(db: AsyncSession, email: str, password: str) -> Opti
     if not verify_password(password, user.hashed_password):
         return None
     
+    return user
+
+async def update_user(db: AsyncSession, user: User, user_data: UserUpdate) -> User:
+    if user_data.full_name is not None:
+        user.full_name = user_data.full_name
+
+    await db.commit()
+    await db.refresh()
+
     return user
