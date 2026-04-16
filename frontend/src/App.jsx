@@ -6,8 +6,8 @@ import NotFoundPage from './pages/NotFoundPage'
 import ProfilePage from './pages/ProfilePage'
 
 function AppContent() {
-  const [token, setToken] = useState('')
-  const [refreshToken, setRefreshToken] = useState('')
+  const [token, setToken] = useState(localStorage.getItem('token') || '')
+  const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken') || '')
   const [tasks, setTasks] = useState([])
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(false)
@@ -37,6 +37,8 @@ function AppContent() {
       .then((data) => {
         setToken(data.access_token)
         setRefreshToken(data.refresh_token)
+        localStorage.setItem('token', data.access_token)
+        localStorage.setItem('refreshToken', data.refresh_token)
         setLoading(false)
         navigate('/dashboard')
       })
@@ -69,6 +71,9 @@ function AppContent() {
 
   function logout() {
     setToken('')
+    setRefreshToken('')
+    localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
     setTasks([])
     setNotifications([])
     setError('')
