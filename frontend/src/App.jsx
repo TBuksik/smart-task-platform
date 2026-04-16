@@ -193,6 +193,10 @@ function AppContent() {
           onStatusUpdate={updateTaskStatus}
         /> : <Navigate to="/"/>
       }/>
+      <Route path="/profile" element={
+        token ?
+        <ProfilePage token={token} /> : <Navigate to="/" />
+      }/>
       <Route path='*' element={<NotFoundPage onLogout={logout}/>}/>
     </Routes>
   )

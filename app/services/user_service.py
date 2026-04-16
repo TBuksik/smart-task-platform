@@ -41,6 +41,6 @@ async def update_user(db: AsyncSession, user: User, user_data: UserUpdate) -> Us
         user.full_name = user_data.full_name
 
     await db.commit()
-    await db.refresh()
+    await db.refresh(user)
 
     return user
