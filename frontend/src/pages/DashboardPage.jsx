@@ -1,9 +1,10 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import TaskList from '../components/TaskList'
 import AddTaskForm from '../components/AddTaskForm'
 import Notifications from '../components/Notifications'
 import SearchBar from '../components/SearchBar'
 import styles from './DashboardPage.module.css'
-import { useState } from 'react'
 
 function DashboardPage({ tasks, notifications, onAdd, onLogout, onSearch, onDelete, onUpdate, onStatusUpdate }) {
   const [searchQuery, setSearchQuery] = useState('')
@@ -25,10 +26,13 @@ function DashboardPage({ tasks, notifications, onAdd, onLogout, onSearch, onDele
     onSearch('', 'all')
   }
 
+  const navigate = useNavigate()
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Dashboard</h1>
+        <button className={styles.button} onClick={() => navigate('/profile')}>Profil</button>
         <button className={styles.button} onClick={onLogout}>Wyloguj</button>
       </div>
       <AddTaskForm onAdd={onAdd} />
