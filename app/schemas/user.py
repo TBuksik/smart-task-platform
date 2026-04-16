@@ -21,7 +21,6 @@ class UserLogin(BaseModel):
     password: str
 
 class UserUpdate(BaseModel):
-    password: Optional[str] = Field(default=None, min_length=8)
     full_name: Optional[str] = None
 
 class RefreshTokenRequest(BaseModel):
