@@ -12,6 +12,8 @@ function AppContent() {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [currentUser, setCurrentUser] = useState(null)
+
   const navigate = useNavigate()
 
 
@@ -77,6 +79,7 @@ function AppContent() {
     setTasks([])
     setNotifications([])
     setError('')
+    setCurrentUser(null)
     navigate('/')
   }
 
@@ -95,6 +98,18 @@ function AppContent() {
     }
 
     return () => ws.close()
+  }, [token])
+
+
+  useEffect(() => {
+    if (token === '') return
+    fetch('/api/v1/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      setCurrentUser(data)
+    })
   }, [token])
 
 
@@ -197,6 +212,7 @@ function AppContent() {
           onDelete={deleteTask}
           onUpdate={updateTask}
           onStatusUpdate={updateTaskStatus}
+          currentUser={currentUser}
         /> : <Navigate to="/"/>
       }/>
       <Route path="/profile" element={
