@@ -6,9 +6,11 @@ import Notifications from '../components/Notifications'
 import SearchBar from '../components/SearchBar'
 import styles from './DashboardPage.module.css'
 
-function DashboardPage({ tasks, notifications, onAdd, onLogout, onSearch, onDelete, onUpdate, onStatusUpdate }) {
+function DashboardPage({ tasks, notifications, onAdd, onLogout, onSearch, onDelete, onUpdate, onStatusUpdate, currentUser }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+
+  const navigate = useNavigate()
 
   function handleSearch(value) {
     setSearchQuery(value)
@@ -26,12 +28,10 @@ function DashboardPage({ tasks, notifications, onAdd, onLogout, onSearch, onDele
     onSearch('', 'all')
   }
 
-  const navigate = useNavigate()
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Dashboard</h1>
+        <h1 className={styles.title}>Cześć, {currentUser?.full_name || currentUser?.email}!</h1>
         <button className={styles.button} onClick={() => navigate('/profile')}>Profil</button>
         <button className={styles.button} onClick={onLogout}>Wyloguj</button>
       </div>
