@@ -3,7 +3,7 @@ from sqlalchemy import select
 from typing import Optional
 
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserPasswordUpdate, UserUpdate
 from app.core.security import hash_password, verify_password
 
 async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
@@ -44,3 +44,11 @@ async def update_user(db: AsyncSession, user: User, user_data: UserUpdate) -> Us
     await db.refresh(user)
 
     return user
+
+async def update_password(db: AsyncSession, user: User, password_data: UserPasswordUpdate) -> bool:
+    if not verify_password(password_data.current_password, user.hashed_password):
+        return False
+
+    user.hashed_password = hash_password(password_data.new_password)
+    await db.commit()
+    return True
