@@ -13,7 +13,7 @@ from app.core.security import create_access_token, create_refresh_token, decode_
 from app.core.oauth import oauth
 from app.core.config import settings
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, UserLogin, RefreshTokenRequest, UserUpdate
+from app.schemas.user import UserCreate, UserPasswordUpdate, UserResponse, UserLogin, RefreshTokenRequest, UserUpdate
 from app.services import user_service
 from app.schemas.user import UserCreate
 
@@ -114,3 +114,16 @@ async def update_me(
 ):
     return await user_service.update_user(db, current_user, user_data)
 
+
+@router.patch("/me/password", status_code=status.HTTP_200_OK)
+async def update_password(
+    password_data: UserPasswordUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    success = await user_service.update_password(db, current_user, password_data)
+
+    if not success:
+        raise HTTPException(status_code=400, detail="Nieprawidłowe aktualne hasło")
+
+    return {"message": "Hasło zostalo zmienione"}
