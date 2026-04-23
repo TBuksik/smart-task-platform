@@ -40,5 +40,10 @@ class User(Base):
         server_default=func.now()
     )
 
+    avatar_url: Mapped[Optional[str]] = mapped_column(
+        String(500),
+        nullable=True
+    )
+
     def __repr__(self) -> str:
         return f"<User id={self.id} email={self.email}>"
