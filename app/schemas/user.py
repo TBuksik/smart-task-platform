@@ -13,6 +13,7 @@ class UserResponse(BaseModel):
     full_name: Optional[str] = None
     is_active: bool
     created_at: datetime
+    avatar_url: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
