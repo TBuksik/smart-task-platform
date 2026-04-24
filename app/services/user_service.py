@@ -1,3 +1,5 @@
+import uuid
+import os
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import Optional
@@ -52,3 +54,18 @@ async def update_password(db: AsyncSession, user: User, password_data: UserPassw
     user.hashed_password = hash_password(password_data.new_password)
     await db.commit()
     return True
+
+async def upload_avatar(db: AsyncSession, user: User, file_content: bytes, filename: str) -> User:
+    extension = os.path.splitext(filename)[1]
+    unique_filename = f"{uuid.uuid4()}{extension}"
+    file_path = f"app/static/avatars/{unique_filename}"
+
+    with open(file_path, "wb") as f:
+        f.write(file_content)
+
+    user.avatar_url = f"/static/avatars/{unique_filename}"
+    await db.commit()
+    await db.refresh(user)
+
+    return user
+
